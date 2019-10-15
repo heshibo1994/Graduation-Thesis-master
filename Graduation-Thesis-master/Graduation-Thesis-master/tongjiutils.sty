@@ -1,0 +1,157 @@
+\ProvidesPackage{tongjiutils}[2018/02/15 2 put any packages you would like to use here]
+
+% 处理数学公式中的黑斜体的宏包
+%\RequirePackage{bm}
+
+
+% 不同于~|\mathcal| or |\mathfrak| 之类的英文花体字体
+%\RequirePackage{mathrsfs}
+
+% 表格中支持跨行
+\RequirePackage{multirow}
+
+% 表格中的反斜线
+\RequirePackage{diagbox}
+
+% 固定宽度的表格
+\RequirePackage{tabularx}
+
+% 表格中的反斜线
+\RequirePackage{slashbox}
+
+% 确定浮动对象的位置，可以使用~H，强制将浮动对象放到这里（可能效果很差）
+\RequirePackage{float}
+
+% 浮动图形控制宏包。
+% 允许上一个~section 的浮动图形出现在下一个~section 的开始部分
+% 该宏包提供处理浮动对象的~|\FloatBarrier| 命令，使所有未处
+% 理的浮动图形立即被处理。这三个宏包仅供参考，未必使用：
+ % \RequirePackage[below]{placeins}
+ % \RequirePackage{floatflt} % 图文混排用宏包
+ % \RequirePackage{rotating} % 图形和表格的控制旋转
+
+% 给自定义的宏后面自动加空白
+% \RequirePackage{xspace}
+
+%\usepackage[chapter,newfloat]{minted}
+%\usepackage{sourcecodepro}
+%\setminted{fontsize=\footnotesize}
+%\usepackage{caption}
+
+%\newenvironment{code}{\captionsetup{type=listing}}{}
+%\SetupFloatingEnvironment{listing}{name=代码}
+
+
+
+% 借用 ltxdoc 里面的几个命令。
+\def\cmd#1{\cs{\expandafter\cmd@to@cs\string#1}}
+\def\cmd@to@cs#1#2{\char\number`#2\relax}
+\DeclareRobustCommand\cs[1]{\texttt{\char`\\#1}}
+
+\newcommand*{\meta}[1]{{%
+  \ensuremath{\langle}\rmfamily\itshape#1\/\ensuremath{\rangle}}}
+\providecommand\marg[1]{%
+  {\ttfamily\char`\{}\meta{#1}{\ttfamily\char`\}}}
+\providecommand\oarg[1]{%
+  {\ttfamily[}\meta{#1}{\ttfamily]}}
+\providecommand\parg[1]{%
+  {\ttfamily(}\meta{#1}{\ttfamily)}}
+\providecommand\pkg[1]{{\sffamily#1}}
+
+% 定义自己常用的东西
+\newcommand{\china}{中华人民共和国}
+% 定义破折号
+\newcommand{\pozhehao}{\kern0.3ex\rule[0.8ex]{2em}{0.1ex}\kern0.3ex}
+%多级公式输入时修改分子分母字母大小
+ \newcommand{\FS}[2]{\displaystyle\frac{#1}{#2}} 
+ %采用supertabular实现长表格分页显示
+ \RequirePackage{supertabular}
+%定义三种新的column对齐格式，允许使用L C R的带长度的表格列
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}           
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+%表格内部强制换行
+\newcommand{\tabincell}[2]{
+\begin{tabular}{@{}#1@{}}#2\end{tabular}
+}    
+
+% % 超链接颜色,如不想要颜色，可将下面hypersetup部分注释掉
+% % 参考自https://tex.stackexchange.com/questions/50747/options-for-appearance-of-links-in-hyperref
+% %\RequirePackage{hyperref}
+% \hypersetup{
+%   colorlinks,
+%   menucolor=.,
+%   linkcolor=red,
+%   anchorcolor=black,
+%   citecolor=blue,
+%   urlcolor=black
+% }  
+
+% 以下配置，详见名为The algorithmicx package的文档，还有其他的链接不放上来了
+\RequirePackage[chapter]{algorithm} % 算法的counter按章节来搞，如算法 1.2
+\RequirePackage{algpseudocode}
+% algorithm中文标题定制
+\renewcommand{\ALG@name}{算法}
+% algpseudocode 中文定制
+\algrenewcommand\algorithmicrequire{\textbf{输入：}}
+\algrenewcommand\algorithmicreturn{\textbf{返回}}
+
+
+% sidewaysfigure
+\RequirePackage{rotating}
+
+%columns
+%\RequirePackage{multicols}
+\usepackage{subcaption}% or \usepackage{caption}
+
+% list code 
+\RequirePackage{listings}
+\renewcommand{\lstlistingname}{代码}% Listing -> 代码列表
+\renewcommand{\lstlistlistingname}{List of \lstlistingname s}% List of Listings -> List of 代码 
+
+% color support
+\RequirePackage{xcolor}
+\definecolor{my_listing_color}{RGB}{255, 171, 128}
+
+\definecolor{CPPLight}  {HTML} {686868}
+\definecolor{CPPSteel}  {HTML} {888888}
+\definecolor{CPPDark}   {HTML} {262626}
+\definecolor{CPPBlue}   {HTML} {4172A3}
+\definecolor{CPPGreen}  {HTML} {487818}
+\definecolor{CPPBrown}  {HTML} {A07040}
+\definecolor{CPPRed}    {HTML} {AD4D3A}
+\definecolor{CPPViolet} {HTML} {7040A0}
+\definecolor{CPPGray}  {HTML} {B8B8B8}
+\lstset{
+    columns=fixed,       
+    numbers=left,                                        % 在左侧显示行号
+    frame=none,                                          % 不显示背景边框
+    backgroundcolor=\color[RGB]{245,245,244},            % 设定背景颜色
+    keywordstyle=\color[RGB]{40,40,255},                 % 设定关键字颜色
+    numberstyle=\footnotesize\color{darkgray},           % 设定行号格式
+    commentstyle=\it\color[RGB]{0,96,96},                % 设置代码注释的格式
+    stringstyle=\rmfamily\slshape\color[RGB]{128,0,0},   % 设置字符串格式
+    showstringspaces=false,                              % 不显示字符串中的空格
+    language=c++,                                        % 设置语言
+    morekeywords={alignas,continute,friend,register,true,alignof,decltype,goto,
+    reinterpret_cast,try,asm,defult,if,return,typedef,auto,delete,inline,short,
+    typeid,bool,do,int,signed,typename,break,double,long,sizeof,union,case,
+    dynamic_cast,mutable,static,unsigned,catch,else,namespace,static_assert,using,
+    char,enum,new,static_cast,virtual,char16_t,char32_t,explict,noexcept,struct,
+    void,export,nullptr,switch,volatile,class,extern,operator,template,wchar_t,
+    const,false,private,this,while,constexpr,float,protected,thread_local,
+    const_cast,for,public,throw,std},
+    emph={map,set,multimap,multiset,unordered_map,unordered_set,
+    unordered_multiset,unordered_multimap,vector,string,list,deque,
+    array,stack,forwared_list,iostream,memory,shared_ptr,unique_ptr,
+    random,bitset,ostream,istream,cout,cin,endl,move,default_random_engine,
+    uniform_int_distribution,iterator,algorithm,functional,bing,numeric,},
+    emphstyle=\color{CPPViolet}, 
+}
+
+
+% Annotating individual math terms with braces，use \mathclap from the mathtools package
+% see: https://tex.stackexchange.com/questions/36153/annotating-individual-math-terms-with-braces/36154
+\RequirePackage{mathtools}
+\endinput
+
