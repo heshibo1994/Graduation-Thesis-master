@@ -22,7 +22,7 @@ slamx = []
 slamy = []
 slamz = []
 
-for i in range(100,1400):
+for i in range(80,800):
 	gpsx.append(table.row_values(i)[1]-6)
 	gpsy.append(table.row_values(i)[3])
 	gpsz.append(table.row_values(i)[5])
@@ -37,7 +37,7 @@ import matplotlib.pyplot as plt
 #调用plt。plot来画图,横轴纵轴两个参数即可
 plt.plot(gpsx,gpsy)
 # python要用show展现出来图
-plt.show()
+#plt.show()
 
 
 plt.plot(gpsx,gpsy,  color='red', label='GPS',ls='-.')#ls或linestyle
