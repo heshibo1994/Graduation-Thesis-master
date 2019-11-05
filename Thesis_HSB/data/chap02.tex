@@ -127,7 +127,7 @@ SLAM是一个在导航的过程中，进行建图的工作，在使用单目相�
   \vskip0.5cm
     \subcaptionbox{根据自然场景建图}{\label{fig:cross_map}
     \includegraphics[width=12cm]{cross_map.png}\hskip2cm}
-  \caption{包含二维码的构建地图示意图\texttt{subcaptionbox}}\label{fig:map}
+  \caption{包含二维码的构建地图示意图}\label{fig:map}
   \end{figure}
 
 \subsection{包含二维码的地图描述}
@@ -243,7 +243,8 @@ T_{world}^{m} =\begin{bmatrix}T_{marker}^{w}\end{bmatrix}^{-1}
 \end{equation}
 
 其中，二维码在真实世界坐标系的位姿可以按照实际场景进行设置，为了计算方便，直接设定第一个二维码的中心点为世界坐标系三维坐标的
-中心点，且x轴朝右，y轴朝上，z轴垂直于二维码平面向外，如图~\ref{fig:Aruco_global}所示，那么第一个二维码的在世界坐标系下的坐标为（0,0,0），其余二维码
+中心点，且x轴朝右，y轴朝上，z轴垂直于二维码平面向外，如图~\ref{fig:Aruco_global}所示，那么第一个二维码的在世界坐标系下的坐
+标为（0,0,0），其余二维码
 则可以按照真实尺度获取。
 \begin{figure}[H] % use float package if you want it here
   \centering
