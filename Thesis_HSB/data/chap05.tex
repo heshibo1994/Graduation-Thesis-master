@@ -50,7 +50,6 @@
 \end{figure}
 \subsection{视觉定位系统实验结果分析}
 \label{sec:5.2.2}
-
 按照上述实验流程让无人机进行自主飞行，可以直接获取到视觉算法生成的地图以及无人机在飞行的过程中生成的三维坐标，根据这些数据可以对
 视觉算法关于无人机自主定位的效果进行定量的分析，本节主要从生成地图的精度，无人机三维坐标的精度以及轨迹精度三个方面进行定量分析。
 
@@ -75,15 +74,15 @@
   15     & -12.25  & 	16.15 &	7.27            \\
   \bottomrule
   \end{tabular}
-  \end{table}
+\end{table}
 
-  针对地图的精度，可以提出以下两个判断指标。\\
-  1）任意两个二维码之间距离的测量值和理论值的误差比较；\\
-  2）所有二维码是否在同一个坐标平面。
-  
+针对地图的精度，可以提出以下两个判断指标。\\
+1）任意两个二维码之间距离的测量值和理论值的误差比较；\\
+2）所有二维码是否在同一个坐标平面。
+
 针对指标1，计算得到表~\ref{tab:chap1:marker_map_error}，经过计算得到地图中二维码的误差精度为3.1$\%$。
 
-  \begin{table}[h]
+\begin{table}[h]
     \centering
     \caption{二维码位置误差}
     \label{tab:chap1:marker_map_error}
@@ -121,16 +120,16 @@
     12&	15&	12.2&	12&	1.67$\%$\\  
     \bottomrule
     \end{tabular}
-    \end{table}
+\end{table}
 
 针对指标2，绘制出每个二维码的在同一个坐标平面的误差情况，如图~\ref{fig:marker_map_error_Z}所示，，平均误差为0.18m
 可以认定所有二维码基本都在同一水平面内。
-    \begin{figure}[H] % use float package if you want it here
-      \centering
-      \includegraphics[height=8cm]{marker_map_error_Z.png}
-      \caption{二维码Z方向数据}
-      \label{fig:marker_map_error_Z}
-    \end{figure}
+\begin{figure}[H] % use float package if you want it here
+  \centering
+  \includegraphics[height=8cm]{marker_map_error_Z.png}
+  \caption{二维码Z方向数据}
+  \label{fig:marker_map_error_Z}
+\end{figure}
 其次对于无人机三维坐标的精度，以无人机自带GPS测距仪器测定出的坐标为真值，和视觉算法计算出来的位置信息进行对比，选择无人机
 在0-800帧的数据，在X、Y、Z方向得到的结果分别如图~\ref{fig:chap2:pose_xyz}所示,其中蓝色连线为视觉算法检测出的坐标值，红色
 连线无人机GPS检测出的真实值。
@@ -144,10 +143,10 @@
     \subcaptionbox{Z方向GPS和视觉算法对比图}{\label{fig:chap1:pose_z}
     \includegraphics[width=6cm]{pose_z.png}\hskip2cm}
   \caption{各方向GPS和视觉算法对比图}\label{fig:chap2:pose_xyz}
-  \end{figure}
+\end{figure}
 随后，计算真值和测量值之间的误差，在X、Y、Z方向分别得到结果如图~\ref{fig:chap2:pose_error_xyz}所示，对于X、Y、Z三个方向分别可以
 得到距离误差为0.22m、0.37m、0.107m。
-  \begin{figure}[H]
+\begin{figure}[H]
     \centering
       \subcaptionbox{X方向GPS和视觉算法对比图}{\label{fig:chap1:pose_error_x}
       \includegraphics[width=12cm]{pose_error_x.png}}
@@ -158,15 +157,45 @@
       \subcaptionbox{Z方向GPS和视觉算法对比图}{\label{fig:chap1:pose_error_z}
       \includegraphics[width=12cm]{pose_error_z.png}}
     \caption{各方向GPS和视觉算法误差对比图}\label{fig:chap2:pose_error_xyz}
-    \end{figure}
+\end{figure}
 最后，对无人机的轨迹精度进行对比。无人机在自主飞行过程中能够产生实时的相对于真实世界坐标系的定位信息，将其与GPS生成的定位信息
 进行对比，如图~\ref{fig:pose_map}所示。
-    \begin{figure}[H] % use float package if you want it here
-      \centering
-      \includegraphics[height=12cm]{pose_map.png}
-      \caption{无人机轨迹对比示意图}
-      \label{fig:pose_map}
-    \end{figure}
-    对于无人机的直飞路线，误差较小，GPS和视觉算法测算出的轨迹基本吻合，但是在对于转弯改变方向的区间，两者之间的相对误差则较大，
-    考虑其原因为，在转弯处所设计的循迹点相对比较稠密，导致在该区域内无人机需要改变的方向更大，导致视觉算法在测算时由于方法振动
-    的缘故产生较大的误差。
+\begin{figure}[H] % use float package if you want it here
+  \centering
+  \includegraphics[height=10cm]{pose_map.png}
+  \caption{无人机轨迹对比示意图}
+  \label{fig:pose_map}
+\end{figure}
+对于无人机的直飞路线，误差较小，GPS和视觉算法测算出的轨迹基本吻合，但是在对于转弯改变方向的区间，两者之间的相对误差则较大,考虑
+其原因为在转弯处所设计的循迹点相对比较稠密，导致在该区域内无人机需要改变的方向更大，导致视觉算法在测算时由于方法振动的缘故产生
+较大的误差。
+\section{三维重建系统测试}
+\label{sec:5.3}
+\subsection{三维重建系统实验步骤设计}
+\label{sec:5.3.1}
+\subsection{三维重建系统实验结果分析}
+\label{sec:5.3.2}
+\section{体积测算系统测试}
+\label{sec:5.4}
+\subsection{体积测算系统实验步骤设计}
+\label{sec:5.4.1}
+在第四章，本文提出了一种基于纯视觉方法来测算场景中物体体积的方法，基于对实验场景进行的三维重建结果，整个实验步骤主要包括以下四个方面\\
+1）解析水平面的方程\\
+2）估计出整个场景的实际尺度\\
+3）点云提纯\\
+4）计算三维点云的体积。
+在对测算场景体积之前，需要收集该场景的连续视频帧以获取其三维重建的结果，所收集的连续视频帧序列如图~\ref{fig:getVolume_inputCamera}
+所示，其三维重建的稀疏点云和稠密结果分别如图和图所示。考虑到稠密点云的点集数量过大，在遍历和查询时都会比较耗时，且稀疏点云也包含了每个特征点的坐标信息和相机的位姿信息，后续在解析水平面方程和估计场景实际尺度时选择稀疏点云作为分析对象。
+
+
+
+\begin{figure}[H] % use float package if you want it here
+  \centering
+  \includegraphics[height=9cm]{getVolume_inputCamera.png}
+  \caption{三维重建输入视频序列图}
+  \label{fig:getVolume_inputCamera}
+  \end{figure}
+
+
+\subsection{体积测算系统实验结果分析}
+\label{sec:5.4.2}

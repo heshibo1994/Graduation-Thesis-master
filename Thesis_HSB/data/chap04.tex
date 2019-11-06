@@ -45,21 +45,87 @@ Aruco二维码的布置都会有下侧两个角点直接落在水平面上，因
 
 \subsection{寻找对应3D坐标}
 \label{sec:4.2.2}
-在上一小结中，可以获得连续视频帧中每一帧的Aruco二维码下侧两个角点的坐标值，同样的，可以直接将如图~\ref{fig:getVolume_inputCamera}
-所示的这些包含二维码的视频帧序列作为三维重建的输入以获取场景的点云，考虑到Aruco的角点被作为特征点时极易被检出，因此只需要通
-过稀疏点云，即可获取角点在二维图像中的坐标和三维重建点云中的三维坐标之间的对应关系。
+在上一小结中，可以获得连续视频帧中每一帧的Aruco二维码下侧两个角点的坐标值，同样的，可以直接将这些包含二维码的视频帧序列作为
+三维重建的输入以获取场景的点云，考虑到Aruco的角点被作为特征点时极易被检出，因此只需要通过稀疏点云，即可获取角点在二维图像中
+的坐标和三维重建点云中的三维坐标之间的对应关系。
 
-\begin{figure}[H] % use float package if you want it here
-  \centering
-  \includegraphics[height=9cm]{getVolume_inputCamera.png}
-  \caption{三维重建输入视频序列图}
-  \label{fig:getVolume_inputCamera}
-  \end{figure}
 在三维重建的过程中，可以获取到每一帧图像中所有特征点所对应的三维重建点云中的三维坐标，无论是稠密点云或者稀疏点云，都可以得到
 一个对应关系，但是考虑到遍历的效率问题，则选择稀疏点云中的点击作为遍历对象。在寻找对应关系的实际过程中，会遇到二维坐标无法映
 射到三维坐标点的情况，那么则会优先选择距离二维点坐标欧氏距离最近的点作为替代对象。此外，还需要注意的是，若所布置的Aruco二维
 码的所有下侧点都位于同一条直线上，那么这样就无法获取准确的水平面方程，因为经过同一直线的平面并不唯一，因此在布置坐标的过程中
 需要注意将所有Aruco二维码尽可能对立放置。
+\subsection{平面方程解析}
+根据上述两个步骤，可以将待求的水平面方程问题转化成求解N个三维点所在水平面方程的非线性优化问题。本文选择谷歌开源的Ceres solver
+库作为解决该非线性问题的工具，Ceres可以解决边界约束鲁棒非线性最小二乘法优化的问题，表达式如下
+\begin{equation}
+\begin{array}{l}\underset x{min}\;\;\frac12\sum\rho_i(\parallel f_i(x_{i_1},...,x_{i_k})\parallel^2)
+\\s.t.\;\;l_j\leq x_j\leq u_j\\\end{array}
+\end{equation}
+其中$rho_i(\parallel f_i(x_{i_1},...,x_{i_k})\parallel^2$这一部分为残差块, $f_i(.)$为代价函数，代价函数的求解依赖于一系列
+参数$[x_{i_1},...,x_{i_k}]$,所有参数构成参数块,限制边界分别为$l_j$,$u_j$。$rho_i$为损失函数，其作用是减少异常值对优化结果的影响。
+在利用Ceres解决非线性问题时，通常分为以下三个步骤：\\
+1）	构建代价函数，也就是具体问题所对应的目标式，本小结具体解决N个三维点所在水平面的方程；\\
+2）	通过代价函数构建待求解的优化问题；\\
+3）	配置求解器参数并求解问题，在这一过程中主要是设定求解方程的方式。\\
+上述步骤如代码~\ref{code:chap3:get_plane}所示。
+\begin{lstlisting}[
+  language=C++,
+  numbers=left,                
+  numberstyle=\footnotesize,
+  frame=single,     
+  basicstyle=\small\tt,    
+  escapeinside = '',
+  caption={优化权重中值滤波的~C++~实现},
+  label={code:chap3:get_plane}]
+  vector<vector<float>> plane_data1;
+  vector<float> planex_data1 ,planey_data1, planez_data1;'//待优化量'
+  '// 第一部分：构建代价函数模型'
+  struct CURVE_FITTING_COST_plane
+  {
+    CURVE_FITTING_COST_plane (double x,double y,double z)
+    :_x( x ), _y ( y ), _z ( z ) {}
+    '// 残差的计算'
+    template <typename T>
+    bool operator() (
+      const T* const plane,    
+      T* residual ) const 
+    {
+      residual[0] = plane[0]*T(_x) + plane[1]*T(_y) 
+                  + plane[2]*T(_z) + plane[3]; 
+      return true;
+    }
+    const double _x, _y, _z;
+  };
+
+  int main ( int argc, char** argv )
+  {   
+    double plane[4] = {0.1,0.1,0.2,0};
+    '// 第二部分：构建最小二乘问题'
+    ceres::Problem problem2;
+    for ( int i=0; i<planex_data1.size(); i++ ){
+      problem2.AddResidualBlock 
+      (new ceres::AutoDiffFunction<CURVE_FITTING_COST_plane,1,4> 
+      ( new CURVE_FITTING_COST_plane 
+      (planex_data1[i], planey_data1[i],planez_data1[i])),
+      nullptr,
+      plane);
+    }
+    '// 第三部分：配置求解器'
+    ceres::Solver::Options options2;    
+    options2.linear_solver_type = ceres::DENSE_QR;
+    options2.minimizer_progress_to_stdout = true; 
+    ceres::Solver::Summary summary2;                 
+    ceres::Solve ( options2, &problem2, &summary2 );
+    for ( auto a:plane ) {
+      outfile_kabc<<a*1/plane[3]<<endl;
+      }
+    return 0;
+  }
+\end{lstlisting}
+对于任意平面方程，都可以利用以下方程通过确定4个参数的方式来确定唯一解析解。
+\begin{equation}ax+by+cz+d= 0\end{equation}
+在迭代的过程中，同时需要确定每个带估计参数的初始值，最终可以得到方程的四个参数a，b，c，d。
+
 \section{结合opencv解算平面和尺度}
 \label{sec:4.3}
 内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容
