@@ -25,14 +25,13 @@
 
 \section{解析水平面方程的一般方法}
 \label{sec:4.2}
-\subsection{检测2D点坐标}
-\label{sec:4.2.1}
-对于大尺度的场景，都需要得到该场景的水平面所在的平面的方程，一方面由于物体的遮挡，水平面很难直接通过视觉的方法构建出来，从而
-导致整个场景非闭合，因此添加水平面后可以使得整个场景封闭；另一方面，水平面的存在能够更好的计算场景的几何特性，例如场景的高度，
+对于大尺度的场景，都需要得到该场景的水平面所在的平面的方程，由于物体的遮挡，水平面很难直接通过视觉的方法构建出来，从而
+导致整个场景非闭合，因此添加水平面后可以使得整个场景封闭；因此，水平面的存在能够更好的计算场景的几何特性，例如场景的高度，
 面积，体积等。由于三维重建本身的点云结果都是基于参考坐标系，没有和世界坐标系对齐，本文考虑到可以结合点云中能够获取到世界坐标
 系的Aruco二维码作为媒介，进行坐标系的转换。
-
-如图~\ref{fig:getVolume_Aruco_detect}所示，可以检测出场景中二维码的ID值，位置，大小，角点坐标等信息，因为在场景中，
+\subsection{检测2D点坐标}
+\label{sec:4.2.1}
+如图~\ref{fig:getVolume_Aruco_detect}所示，可以利用二维码检测算法检测出场景中二维码的ID值，位置，大小，角点坐标等信息，因为在场景中，
 Aruco二维码的布置都会有下侧两个角点直接落在水平面上，因此可以认为所有二维码的下侧角点所构成的平面即是场景的水平面。那么接下
 来即可将水平面的求解转化为二维码角点所在平面的求解。在检测的过程中，需要将所有2D图片的索引和角点的位置记录下即可。
 
@@ -75,7 +74,7 @@ Aruco二维码的布置都会有下侧两个角点直接落在水平面上，因
   frame=single,     
   basicstyle=\small\tt,    
   escapeinside = '',
-  caption={优化权重中值滤波的~C++~实现},
+  caption={获取平面方程参数的~C++~实现},
   label={code:chap3:get_plane}]
   vector<vector<float>> plane_data1;
   vector<float> planex_data1 ,planey_data1, planez_data1;'//待优化量'
@@ -105,7 +104,7 @@ Aruco二维码的布置都会有下侧两个角点直接落在水平面上，因
     for ( int i=0; i<planex_data1.size(); i++ ){
       problem2.AddResidualBlock 
       (new ceres::AutoDiffFunction<CURVE_FITTING_COST_plane,1,4> 
-      ( new CURVE_FITTING_COST_plane 
+      (new CURVE_FITTING_COST_plane 
       (planex_data1[i], planey_data1[i],planez_data1[i])),
       nullptr,
       plane);
@@ -126,9 +125,76 @@ Aruco二维码的布置都会有下侧两个角点直接落在水平面上，因
 \begin{equation}ax+by+cz+d= 0\end{equation}
 在迭代的过程中，同时需要确定每个带估计参数的初始值，最终可以得到方程的四个参数a，b，c，d。
 
-\section{结合opencv解算平面和尺度}
+\section{解算尺度}
 \label{sec:4.3}
-内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容
+由单目视觉重建出来的点云地图都存在没有一个确定尺度的问题，地图中的特征点坐标和相机的位姿都是相对尺度，即最常见的采取初始化成
+功后的前两帧作为单位尺度，后续的所有关键帧都以此为参考确定尺度。这样的做法可以获取到地图中所有描述的绝对尺度，但无法计算出实
+际尺度，本文通过在场景中引入已知尺度的二维码来确定所构点云地图的真实尺度，主要针对同一场景，通过计算两种SLAM的相机位姿来确定
+相对尺度和绝对尺度之间的比例，从而确定绝对尺度。
+\subsection{计算绝对尺度和相对尺度}
+首先，获取绝对尺度的数据，由图~\ref{fig:getVolume_Aruco_detect}所示同时可以得到相机在某一个确定的Aruco下的位姿，因为二维
+码自带确定的边长信息，因此可以得到带有绝对尺度的相机位姿（$T_x$,$T_y$,$T_z$）。在实际的工程中需要注意，必须选择不同状态的
+相机在同一二维码下的位姿，则可以通过多个图像序列获取到多个不同位姿。
+
+其次，再获取同一批图像序列的相对尺度，通过三维重建的结果，就可以得到每一帧相机在参考坐标系下的位姿（$T_x$,$T_y$,$T_z$),
+该位姿为相对尺度，因为只需要考虑到尺度的大小关系，因为不需要讨论不同坐标系之间的相对转化问题。
+\subsection{尺度估计方法}
+通过上一小节，可以获取到多个针对同一场景的两种SLAM相机位姿估计结果，因为两种SLAM方法估计出的相机位姿是基于不同的坐标系得到
+的，本文提出利用相机在不同坐标系下移动的欧式距离之间的比例来确定尺度，简化公式为：
+\begin{equation}K\;=\;\frac{\triangle Pose_{rel}}{\triangle Pose_{abs}}\end{equation}
+同4.2.1节，利用Ceres库得到最优解K值，计算如代码所示，
+\begin{lstlisting}[
+  language=C++,
+  numbers=left,                
+  numberstyle=\footnotesize,
+  frame=single,     
+  basicstyle=\small\tt,    
+  escapeinside = '',
+  caption={获取尺度值的~C++~实现},
+  label={code:chap3:get_plane}]
+  vector<vector<float>> colmap, opencv;
+  vector<float> colmap_data1 ,opencv_data1;'//待优化量'
+  '// 第一部分：构建代价函数模型'
+  struct CURVE_FITTING_COST_k
+  {
+    CURVE_FITTING_COST_k (double x,double y)
+    '// 残差的计算'
+    template <typename T>
+    bool operator() (
+      const T* const k,     
+      T* residual ) const     
+    {
+      residual[0] = T ( _y ) - ( k[0]*T ( _x ) ); // y-ax
+      return true;
+    }
+    const double _x, _y;
+  };
+  int main ( int argc, char** argv )
+  {   
+    double k[1] = {0};
+    '// 第二部分：构建最小二乘问题'
+    ceres::Problem problem;
+    for ( int i=0; i<colmap_data1.size(); i++ ){
+      problem.AddResidualBlock 
+      (new ceres::AutoDiffCostFunction<CURVE_FITTING_COST_k, 1, 1>
+      (new CURVE_FITTING_COST_k 
+      (opencv_data1[i], colmap_data1[i])),
+      nullptr,
+      k);
+    }
+    '// 第三部分：配置求解器'
+    ceres::Solver::Options options;   
+    options.linear_solver_type = ceres::DENSE_QR;  
+    options.minimizer_progress_to_stdout = true;  
+    ceres::Solver::Summary summary;              
+    ceres::Solve ( options, &problem, &summary );  
+    for ( auto a:k ) {
+      outfile_kabc<<a<<endl;
+      }
+  return 0;
+  }
+\end{lstlisting}
+只需要杰出唯一参数K即可，在计算的过程中需要随机获取任意两帧之间的位姿，以减小误差。
 \section{解算体积}
 \label{sec:4.4}
 内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容
