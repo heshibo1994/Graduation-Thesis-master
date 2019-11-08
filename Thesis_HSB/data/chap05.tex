@@ -183,24 +183,18 @@
 相机的位姿信息，后续在解析水平面方程和估计场景实际尺度时选择稀疏点云作为分析对象。
 \subsection{解析水平面方程}
 \label{sec:5.4.1}
-1.	场景布置：在待测场景中需要布置多个不同的Aruco二维码，该二维码如图~\ref{fig:getVolume_Aruco}所示，一方面提高场景三维重
+1.	场景布置：在待测场景中需要布置多个不同的Aruco二维码,一方面提高场景三维重
 建的稳定性和准确性，另外进一步为后续水平面方程的解析提供数据。在布置场景时，需要注意两个问题：1）若所布置的所有Aruco二维码的
 所有下边沿都位于同一条直线上； 2）应该尽可能将所有Aruco的二维码的下边沿都与待求水平面贴合，以保证水平面方程求解的准确性，若
 无法实现水平面的贴合要求，则需要进一步保证所有下边沿都位于同一水平面上，那么对计算得到的水平面进行空间变换即可得到真实水平面
 方程。
-\begin{figure}[H] % use float package if you want it here
-  \centering
-  \includegraphics[height=9cm]{getVolume_Aruco.png}
-  \caption{三维重建输入视频序列图}
-  \label{fig:getVolume_Aruco}
-  \end{figure}
 
 2.	数据收集：可以通过单目相机对场景进行连续采集，在采集视频的过程中需要保证大部分视频帧中都能够采集到完成的二维码，所有的采
 集结果如图~\ref{fig:getVolume_inputCamera}所示。
 
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=9cm]{getVolume_inputCamera.png}
+  \includegraphics[height=9cm]{getVolume_inputCamera_1.png}
   \caption{三维重建输入视频序列图}
   \label{fig:getVolume_inputCamera}
   \end{figure}
@@ -209,8 +203,8 @@
 ~\ref{fig:getVolume_3dconstr_noplane}所示。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=9cm]{getVolume_3dconstr_noplane.png}
-  \caption{三维重建输入视频序列图}
+  \includegraphics[height=6cm]{getVolume_3dconstr_noplane_1.png}
+  \caption{三维重建点云结果示意图}
   \label{fig:getVolume_3dconstr_noplane}
   \end{figure}
 
@@ -250,10 +244,21 @@
 点云即可，结果如图~\ref{fig:getVolume_3dconstr}所示,其中红色点云即为水平面。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=9cm]{getVolume_3dconstr.png}
+  \includegraphics[height=6cm]{getVolume_3dconstr_1.png}
   \caption{三维重建输入视频序列图}
   \label{fig:getVolume_3dconstr}
   \end{figure}
 
 \subsection{估计场景实际尺度}
 \label{sec:5.4.2}
+1.	获取绝对尺度:根据图所示,分别可以获得在ID = 43的二维码坐标系下的相机位姿分别为[-0.127325, -0.172455, 0.980864]
+和[0.324499, -0.0655995, 0.969803]。
+\begin{figure}[H] % use float package if you want it here
+  \centering
+  \includegraphics[height=8cm]{getVolume_Kabs.png}
+  \caption{绝对尺度}
+  \label{fig:getVolume_Kabs}
+  \end{figure}
+可以计算出在这两帧之间相机移动的绝对距离为
+\begin{equation}Pose_{\_abs}\;=\sqrt{{\lbrack(-0.127325)-0.324499\rbrack}^2+\left[(-0.172455)-(-0.0655995)\right]^2+\left[0.980864-\;0.969803\right]^2}\\
+=0.464m\end{equation}

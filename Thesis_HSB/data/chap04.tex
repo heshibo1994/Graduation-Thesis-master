@@ -28,7 +28,13 @@
 对于大尺度的场景，都需要得到该场景的水平面所在的平面的方程，由于物体的遮挡，水平面很难直接通过视觉的方法构建出来，从而
 导致整个场景非闭合，因此添加水平面后可以使得整个场景封闭；因此，水平面的存在能够更好的计算场景的几何特性，例如场景的高度，
 面积，体积等。由于三维重建本身的点云结果都是基于参考坐标系，没有和世界坐标系对齐，本文考虑到可以结合点云中能够获取到世界坐标
-系的Aruco二维码作为媒介，进行坐标系的转换。
+系的Aruco二维码作为媒介，进行坐标系的转换，该类型二维码如图~\ref{fig:getVolume_Aruco}所示。
+\begin{figure}[H] % use float package if you want it here
+  \centering
+  \includegraphics[height=9cm]{getVolume_Aruco.png}
+  \caption{多种Aruco示意图}
+  \label{fig:getVolume_Aruco}
+  \end{figure}
 \subsection{检测2D点坐标}
 \label{sec:4.2.1}
 如图~\ref{fig:getVolume_Aruco_detect}所示，可以利用二维码检测算法检测出场景中二维码的ID值，位置，大小，角点坐标等信息，因为在场景中，
@@ -37,7 +43,7 @@ Aruco二维码的布置都会有下侧两个角点直接落在水平面上，因
 
 \begin{figure}[H] % use float package if you want it here
 \centering
-\includegraphics[height=8cm]{getVolume_Aruco_detect.png}
+\includegraphics[height=8cm]{getVolume_Aruco_detect_1.png}
 \caption{Aruco二维码检测示意图}
 \label{fig:getVolume_Aruco_detect}
 \end{figure}
@@ -142,7 +148,7 @@ Aruco二维码的布置都会有下侧两个角点直接落在水平面上，因
 通过上一小节，可以获取到多个针对同一场景的两种SLAM相机位姿估计结果，因为两种SLAM方法估计出的相机位姿是基于不同的坐标系得到
 的，本文提出利用相机在不同坐标系下移动的欧式距离之间的比例来确定尺度，简化公式为：
 \begin{equation}K\;=\;\frac{\triangle Pose_{rel}}{\triangle Pose_{abs}}\end{equation}
-同4.2.1节，利用Ceres库得到最优解K值，计算如代码所示，
+同4.2.1节，利用Ceres库得到最优解K值，计算如代码~\ref{code:chap3:get_k}所示，
 \begin{lstlisting}[
   language=C++,
   numbers=left,                
@@ -151,7 +157,7 @@ Aruco二维码的布置都会有下侧两个角点直接落在水平面上，因
   basicstyle=\small\tt,    
   escapeinside = '',
   caption={获取尺度值的~C++~实现},
-  label={code:chap3:get_plane}]
+  label={code:chap3:get_k}]
   vector<vector<float>> colmap, opencv;
   vector<float> colmap_data1 ,opencv_data1;'//待优化量'
   '// 第一部分：构建代价函数模型'
