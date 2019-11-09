@@ -251,14 +251,31 @@
 
 \subsection{估计场景实际尺度}
 \label{sec:5.4.2}
-1.	获取绝对尺度:根据图所示,分别可以获得在ID = 43的二维码坐标系下的相机位姿分别为[-0.127325, -0.172455, 0.980864]
-和[0.324499, -0.0655995, 0.969803]。
+1.	获取绝对尺度:根据图~\ref{fig:getVolume_Kabs}所示,分别可以获得在ID = 43的二维码坐标系下的相机位姿，如表~\ref{tab:chap1:2D_3D}
+前两行，可以计算出在这两帧之间相机移动的绝对距离为0.464m。
 \begin{figure}[H] % use float package if you want it here
   \centering
   \includegraphics[height=8cm]{getVolume_Kabs.png}
   \caption{绝对尺度}
   \label{fig:getVolume_Kabs}
   \end{figure}
-可以计算出在这两帧之间相机移动的绝对距离为
-\begin{equation}Pose_{\_abs}\;=\sqrt{{\lbrack(-0.127325)-0.324499\rbrack}^2+\left[(-0.172455)-(-0.0655995)\right]^2+\left[0.980864-\;0.969803\right]^2}\\
-=0.464m\end{equation}
+2.	获取相对尺度：从三维重建的结果中提取出这两帧在参考坐标系下的相机位姿，如表~\ref{tab:chap1:2D_3D}后两行，可以计算出这在这两帧之
+间相机移动的相对距离为4.924。
+\begin{table}[h]
+  \centering
+  \caption{2D坐标和3D坐标关系对应表}
+  \label{tab:chap1:2D_3D}
+  \begin{tabular}{C{3.6cm}L{2.4cm}L{2.4cm}L{2.4cm}C{3.6cm}}
+  \toprule
+  \textbf{序号} & \textbf{$T_x$} &\textbf{$T_y$} &  \textbf{$T_z$} &  \textbf{距离} \\
+  \midrule
+  1027.jpg  &-0.127325& -0.172455& 0.980864& \\
+  1167.jpg  &0.324499 &-0.0655995& 0.969803&0.464\\
+  1027.jpg  &-6.06873 &1.87705   & -2.13389&         \\
+  1167.jpg  &-1.20871 &2.09888   & -1.37369&4.924 \\
+  \bottomrule
+  \end{tabular}
+\end{table}
+
+3.	估计尺度：按照公式~\ref{equ:getVolume_K}可以简略估计出该煤堆场景实际大小和三维重建结果的尺度大小之间的尺度因子
+K = 10.61。

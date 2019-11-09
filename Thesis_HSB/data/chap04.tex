@@ -147,7 +147,8 @@ Aruco二维码的布置都会有下侧两个角点直接落在水平面上，因
 \subsection{尺度估计方法}
 通过上一小节，可以获取到多个针对同一场景的两种SLAM相机位姿估计结果，因为两种SLAM方法估计出的相机位姿是基于不同的坐标系得到
 的，本文提出利用相机在不同坐标系下移动的欧式距离之间的比例来确定尺度，简化公式为：
-\begin{equation}K\;=\;\frac{\triangle Pose_{rel}}{\triangle Pose_{abs}}\end{equation}
+\begin{equation}K\;=\;\frac{\triangle Pose_{rel}}{\triangle Pose_{abs}}  
+\label{equ:getVolume_K}\end{equation}
 同4.2.1节，利用Ceres库得到最优解K值，计算如代码~\ref{code:chap3:get_k}所示，
 \begin{lstlisting}[
   language=C++,
