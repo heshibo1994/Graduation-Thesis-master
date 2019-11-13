@@ -6,11 +6,11 @@
 \section{三维重建的一般步骤}
 \label{sec:3.2}
 三维重建是指从三维图像中复原三维场景或者物体的过程，整个流程的输入为无序的图片即可，输出可以得到三维重建后的稀疏点云和稠密
-点，大致流程如图~\ref{gig:3Dconstr_pipiline_sfm}所示。
+点，大致流程如图~\ref{fig:3Dconstr_pipiline_sfm}所示。
 \begin{figure}[H] % use float package if you want it here
     \centering
     \includegraphics[width=12cm]{3Dconstr_pipiline_sfm.png}
-    \caption{三维重建一般步骤流程图}
+    \caption{三维重建流程图}
     \label{fig:3Dconstr_pipiline_sfm}
     \end{figure}
 \subsection{一般方法概述}
@@ -74,7 +74,7 @@
     \centering
     \caption{常见特征检测方法对比表}
     \label{tab:Feature}
-    \begin{tabular}{C{3.6cm}L{12.4cm}}
+    \begin{tabular}{C{4.6cm}L{8.4cm}}
     \toprule
     \textbf{方法名称} & \textbf{特点}  \\
     \midrule
@@ -92,18 +92,29 @@
 2. 独特性好，信息量丰富，适用于在海量特征数据库中进行快速、准确的匹配；\\
 3. 多量性，即使少数的几个物体也可以产生大量的SIFT特征向量。\\
 如图~\ref{fig:3Dconstrmatchresult}所示，分别对两帧图形提取SIFT特征，随后根据特征点进行匹配。
-
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
       \subcaptionbox{第1帧图像提取SIFT特征}{\label{fig::3Dconstr_a}
       \includegraphics[width=6cm]{3Dconstr_a.png}\hskip2cm}
       \subcaptionbox{第2帧图像提取SIFT特征}{\label{fig:3Dconstr_b}
       \includegraphics[width=6cm]{3Dconstr_b.png}}
     \vskip0.5cm
-      \subcaptionbox{根据特征点进行匹配}{\label{fig:3Dconstr_match}
+      \subcaptionbox{根据特征点进行匹配\label{fig:chap03:3Dconstr_match}}{
       \includegraphics[width=12cm]{3Dconstr_match.png}\hskip2cm}
     \caption{特征提取与匹配结果示意图}\label{fig:3Dconstrmatchresult}
   \end{figure}
+由图~\ref{fig:chap03:3Dconstr_match}~所示，两帧之间大多数特征点都可以正确匹配，但依然存在存在部分匹配是错误的，在本文中，
+选择了RANSAC（随机抽样一致性）的方式来剔除错误的匹配对，以更加准确的估计相机位姿，RANSAC是指可以从一组包括局外点（错误匹
+配）的观测数据中，通过迭代的方式估计数学模式中的参数,通过RANSAC处理后的匹配结果如图~\ref{fig:3Dconstr_matchAfterRansac}
+所示,误检的匹配已经被明显的降低。
+\begin{figure}[H] % use float package if you want it here
+  \centering
+  \includegraphics[width=12cm]{3Dconstr_matchAfterRansac.png}
+  \caption{RANSAC之后的点云匹配}
+  \label{fig:3Dconstr_matchAfterRansac}
+  \end{figure}
+\subsubsection{获取稀疏点云} 
+\label{sec:3.2.2.3}
 \subsection{当前三维重建存在的问题}
 \label{sec:3.2.3}
 

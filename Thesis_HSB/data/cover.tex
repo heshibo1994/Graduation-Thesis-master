@@ -45,40 +45,12 @@
 
 % 定义中英文摘要和关键字
 \begin{cabstract}  
-  基于图像的目标位姿追踪作为增强现实、工业零部件抓取等应用的关键技术，自上世纪九十年代就开始被研究。通过该技术感知物体相对于相机坐标系的位置和姿态，进而对其进行跟随或抓取，在工业、教育、商业展示等领域已有广泛应用。
-  物体位置与姿态追踪技术近年来发展迅速，基于特征点匹配以及姿态解算的方法在精度以及运行速度上已基本满足要求，但对于表面纹理匮乏的目标，由于无法对其进行特征点提取以及匹配，导致算法失效，极大限制了本技术
-  在相关行业的应用。本文针对贫纹理物体研究基于模型的位姿追踪方法，并利用该追踪方法以及计算机图形渲染方法生成位姿数据集并得到位姿真值，
-  利用该数据集以训练物体检测与姿态回归模型，完成追踪算法的自动初始化，实现完整的目标检测与位姿追踪系统。
+  摘要\end{cabstract}
 
-  %本文首先通过查阅相关文献资料，概述了目标位姿追踪的研究背景和意义。综述了目标检测、姿态回归以及位姿追踪的国内外研究现状。介绍了目前常用的位姿数据库，以及各自的生成方法和存在的优缺点。并以此得出本文的主要研究内容和研究目的。%
-
-  研究基于物体三维模型的位姿追踪方法。使用方向倒角距离张量构建匹配目标函数，并使用图像点坐标与物体位姿的雅可比矩阵实现解析求导方法，提高配准的精度。分析追踪过程中的遮挡问题，并提出自适应权重优化算法，降低遮挡以及背景干扰对系统精度及稳定性的影响。
-
-  使用追踪算法以及图形渲染技术生成位姿数据集。利用追踪算法以构建检测以及平移向量真值数据集，以备机器学习算法的模型训练。研究使用~3ds Max~建模软件以及~Vary~图像渲染引擎的~CG~数据集生成方法，降低位姿真值数据库的构建成本，利用该数据库以备追踪算法的精度测试。
-
-  为解决追踪算法无法自动初始化的问题，研究基于机器学习方法的目标检测以及姿态回归方法。利用追踪算法获得的数据集对随机森林模型进行训练，完成目标的检测以及平移向量回归，之后使用模板匹配的方法得到物体的精确初始化位姿。随后研究了初始化系统以及追踪系统的整合问题，并使用~CUDA~框架对算法进行加速，提高系统的时效性。
-  
-  基于真值数据集以及公开数据集，对初始化系统以及位姿追踪系统进行分模块测试。实验结果表明，初始化系统能够成功检测到场景中的目标物体，且在最后的模板匹配模块中得到高精度的初始化位姿，满足追踪算法的初始化要求。追踪算法的测试结果表明，系统对于复杂背景、光照改变以及遮挡问题的鲁棒性强。在视频精度测试中，平均角度误差为~$1.2^\circ$，平移向量误差在~0.8~毫米以内，均优于现有平面图像的追踪算法。
-\end{cabstract}
-
-\ckeywords{位姿追踪, 目标检测, 模型匹配, CG~数据集, 遮挡}
+\ckeywords{关键词, 关键词}
 
 \begin{eabstract}
-  Image-based object pose tracking as a key technology for applications such as augmented reality and industrial component capture has been studied since the 1990s.The position 
-  and pose of the object relative to the camera coordinate system are determined by the method to achieve follow or grab, and it will be widely used in the fields of industry, 
-  education, commercial display and the like. Object position and pose tracking methods have developed rapidly in recent years. The methods based on feature point matching and pose 
-  estimation has basically met the requirements in terms of accuracy and running speed. However, for the target with insufficient surface texture, feature point extraction and matching
-   cannot be performed. Resulting in tracking failure, greatly limits the application of this technology in related industries. In this paper, we propose a model-based pose tracking 
-   method for the textureless object, and use the tracking method and computer graphics rendering method to generate the image dataset and get the pose true value. The dataset is used
-    to train the object detection and pose regression models to complete the automatic initialization of the tracking algorithm.
-
-  This paper studies the pose tracking method based on the 3D model of the object. Using the direction chamfer distance tensor to construct the matching objective function, and use the Jacobian matrix of image point coordinates and relative pose to realize the analytical derivation method to improve the accuracy of registration. Furthermore, analyze the occlusion problem in the tracking process, and proposed an algorithm based on adaptive weight optimization to reduce the influence of occlusion and background interference on pose tracking.
-
-  Using the tracking algorithm and graphics rendering techniques to generate a pose dataset. The tracking algorithm is used to construct the detection and translation vector truth data sets for the training of machine learning algorithms. The CG dataset generation method using 3ds Max modeling software and Vary image rendering engine is studied to reduce the construction cost of the pose true value dataset, and this dataset is used for the accuracy test of the tracking algorithm.
-
-  Aiming at the automatic initialization problem of tracking algorithm, the object detection and pose regression method based on machine learning method are studied. We use the created data set to train the random forest model, achieve object detection and translation vector regression. Then propose a template matching method to obtain the precise initial pose of the object. We studied the integration of the initialization system and the tracking system, and accelerated the algorithm using the CUDA framework to improve the timeliness of the system.
-
-  Based on the truth data set and the public data set, we test the initialization system and the pose tracking system in modules. The experimental results show that the initialization system can overcome the multi-detection and false detection problems of the detection algorithm. The final template matching can achieve an initial pose with high matching accuracy and meet the initialization requirements. The test results of the tracking algorithm show that the system is robust to complex backgrounds, illumination changes, and occlusion. In the high video quality accuracy test, the average angular error is~$1.2^\circ$~ and the translation vector error is within 0.8 mm, which is better than the existing image tracking algorithm.
+abstract
 \end{eabstract}
 
-\ekeywords{Pose tracking, Object detection, Model matching, CG dataset, Occlusion}
+\ekeywords{keywords}

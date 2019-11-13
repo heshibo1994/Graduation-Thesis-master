@@ -69,9 +69,9 @@ Aruco二维码的布置都会有下侧两个角点直接落在水平面上，因
 其中$rho_i(\parallel f_i(x_{i_1},...,x_{i_k})\parallel^2$这一部分为残差块, $f_i(.)$为代价函数，代价函数的求解依赖于一系列
 参数$[x_{i_1},...,x_{i_k}]$,所有参数构成参数块,限制边界分别为$l_j$,$u_j$。$rho_i$为损失函数，其作用是减少异常值对优化结果的影响。
 在利用Ceres解决非线性问题时，通常分为以下三个步骤：\\
-1）	构建代价函数，也就是具体问题所对应的目标式，本小结具体解决N个三维点所在水平面的方程；\\
-2）	通过代价函数构建待求解的优化问题；\\
-3）	配置求解器参数并求解问题，在这一过程中主要是设定求解方程的方式。\\
+1.	构建代价函数，也就是具体问题所对应的目标式，本小结具体解决N个三维点所在水平面的方程；\\
+2.	通过代价函数构建待求解的优化问题；\\
+3.	配置求解器参数并求解问题，在这一过程中主要是设定求解方程的方式。\\
 上述步骤如代码~\ref{code:chap3:get_plane}所示。
 \begin{lstlisting}[
   language=C++,
@@ -128,7 +128,7 @@ Aruco二维码的布置都会有下侧两个角点直接落在水平面上，因
   }
 \end{lstlisting}
 对于任意平面方程，都可以利用以下方程通过确定4个参数的方式来确定唯一解析解。
-\begin{equation}ax+by+cz+d= 0\end{equation}
+\begin{equation}Ax+By+Cz+D= 0\label{equ:plane}\end{equation}
 在迭代的过程中，同时需要确定每个带估计参数的初始值，最终可以得到方程的四个参数a，b，c，d。
 
 \section{解算尺度}
@@ -204,5 +204,76 @@ Aruco二维码的布置都会有下侧两个角点直接落在水平面上，因
 只需要杰出唯一参数K即可，在计算的过程中需要随机获取任意两帧之间的位姿，以减小误差。
 \section{解算体积}
 \label{sec:4.4}
-内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容
+根据以上两节可以获取到三维重建后点云的水平面和比例尺度，再此基础上计算出物体的实际体积，本文提出一种计算点云实际体积的方法，
+具体流程如下：\\
+1.	将所有点云结果投影在水平面上，根据场景的实际空间约束和过滤方法提出得到点云中的有效3D点集；\\
+2.	通过空间变换，将三维空间点转化为水平面上的点2D点集;\\
+3.	对所有点集求Delauncy三角形，计算每个三角形对应的水平高度，得到三棱柱体积；\\
+4.	剔除异常三棱柱，将所有有效的三棱柱积分求和得到总体积。
+\subsection{获取有效3D点集}
+通过第~\ref{cha:chap3}章的方法，可以对场景获取到三维稀疏点云和稠密点云，在生成点云的过程中会把部分非感兴趣区域的内容和一些
+离散的误差噪音点添加至点云结果中。针对这两种情况，本文分别提出以下对应的解决方法：\\
+1.	针对非感兴趣区域，本文通过三维空间平面方程对非感兴趣区域直接进行切割剔除；\\
+2.	针对随机误差噪音点，本文通过离群点检测算法进行剔除。
+
+对于方案1，在三维重建后的点云中，只需要收集感兴趣区域内的3D点集，如图~\ref{fig:getVolume_interesting}所示，只有红色框图
+内区域是感兴趣区域，可以通过上一节求出的水平面方程和二维码的底边点坐标共同约束求出空间切面方程对场景进行切割。
+\begin{figure}[H] % use float package if you want it here
+  \centering
+  \includegraphics[height=5cm]{getVolume_interesting.png}
+  \caption{三维重建感兴趣区域示意图}
+  \label{fig:getVolume_interesting}
+\end{figure}
+对于方案2，本文采用统计滤波器即为对每个点的邻域进行一个统计分析，并修剪掉一些不符合标准的点，具体方法为在输入数据中对点到临
+近点的距离分布的计算，对每一个点，计算它到所有临近点的平均距离（假设得到的结果是一个高斯分布，其形状是由均值和标准差决定），
+那么平均距离在标准范围之外的点，可以被定义为离群点并从数据中去除。采用统计滤波对点云中的离散点进行滤波对比如
+图~\ref{fig:getVolume_3dconstr_filter}所示。
+\begin{figure}[H]
+  \centering
+    \subcaptionbox{对点云统计滤波前}{\label{fig:chap1:getVolume_3dconstr_noise}
+    \includegraphics[width=9cm]{getVolume_3dconstr_noise.png}}
+  \vskip0.5cm
+    \subcaptionbox{对点云统计滤波后}{\label{fig:chap1:getVolume_3dconstr_nonoise}
+    \includegraphics[width=9cm]{getVolume_3dconstr_nonoise.png}}
+  \caption{点云统计滤波前后效果对比示意图}\label{fig:getVolume_3dconstr_filter}
+\end{figure}
+\subsection{空间变换}
+\label{sec:4.4.2}
+通过上一小结，可以求出有效的3D点集，在本小节中需要将所有三维点云投影至二维平面上获取2D点集，简略步骤如下：\\
+1.	通过节获取点云水平面和参考坐标系中的xy平面的水平面的法向量P(A,B,C)和Q(0,0,1);\\
+2.	计算旋转角度：
+\begin{equation}
+\theta=arc\cos(\frac{P\cdot Q}{\left|P\right|\left|Q\right|})
+\end{equation}
+3.	计算旋转轴：在计算旋转角时可知，旋转角所在的平面为有P和Q所构成的平面，那么旋转轴必垂直该平面。
+假定旋转前向量为a($a_1$, $a_2$, $a_3$)， 旋转后向量为b（$b_1$, $b_2$, $b_3$)。由叉乘定义得旋转轴c($c_1$, $c_2$, $c_3$)为
+\begin{equation}
+\begin{pmatrix}c_1\\c_2\\c_3\end{pmatrix}=\begin{pmatrix}a_2b_3-a_3b_2\\a_3b_1-a_1b_3\\a_1b_2-a_2b_1\end{pmatrix}
+\end{equation}
+
+
+\subsection{获取Delauncy三角形}
+\label{sec:4.4.3}
+通过~\ref{sec:4.2}小结通过4.2小节，可以计算出三维重建后物体的水平面所在的平面方程，首先将需要计算出空间中每个
+点O($x_o$,$y_o$,$z_o$)投影在水平面方程上的投影坐标P($x_p$,$y_p$,$z_p$)，假设该三维空间水平面方程的一般形式
+如方程~\ref{equ:plane}，结合垂直约束，根据公式~\ref{equ:pxyz}可以计算出P的坐标为：
+\begin{equation}
+\begin{split}
+x_p=\frac{(B^2+C^2)x_o-A(By_o+Cz_o+D)}{A^2+B^2+C^2}\\
+y_p=\frac{(A^2+C^2)y_o-B(Ax_o+Cz_o+D)}{A^2+B^2+C^2}\\
+z_p=\frac{(A^2+B^2)z_o-C(Ax_o+By_o+D)}{A^2+B^2+C^2}
+\label{equ:pxyz}
+\end{split}
+\end{equation}
+通过上面的公式可以将三维点云中的所有点都投影在平面上，后续以该平面上的所有二维点
+
+同时也可以根据公式计算出每一个三维空间点到水平面的方程
+\begin{equation}
+d\;=\frac{\left|Ax_0+By_0+Cz_0+D\right|}{\sqrt{A^2+B^2+C^2}}
+\end{equation}
+
+
+
+
+
 
