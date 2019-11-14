@@ -137,6 +137,13 @@ Aruco二维码的布置都会有下侧两个角点直接落在水平面上，因
 功后的前两帧作为单位尺度，后续的所有关键帧都以此为参考确定尺度。这样的做法可以获取到地图中所有描述的绝对尺度，但无法计算出实
 际尺度，本文通过在场景中引入已知尺度的二维码来确定所构点云地图的真实尺度，主要针对同一场景，通过计算两种SLAM的相机位姿来确定
 相对尺度和绝对尺度之间的比例，从而确定绝对尺度。
+流程图如图~\ref{gig:getVolume_getK}所示。
+\begin{figure}[H] % use float package if you want it here
+  \centering
+  \includegraphics[height=12cm]{getVolume_getK.png}
+  \caption{估计尺度流程图}
+  \label{fig:getVolume_getK}
+\end{figure}
 \subsection{计算绝对尺度和相对尺度}
 首先，获取绝对尺度的数据，由图~\ref{fig:getVolume_Aruco_detect}所示同时可以得到相机在某一个确定的Aruco下的位姿，因为二维
 码自带确定的边长信息，因此可以得到带有绝对尺度的相机位姿（$T_x$,$T_y$,$T_z$）。在实际的工程中需要注意，必须选择不同状态的
@@ -210,7 +217,15 @@ Aruco二维码的布置都会有下侧两个角点直接落在水平面上，因
 2.	通过空间变换，将三维空间点转化为水平面上的点2D点集;\\
 3.	对所有点集求Delauncy三角形，计算每个三角形对应的水平高度，得到三棱柱体积；\\
 4.	剔除异常三棱柱，将所有有效的三棱柱积分求和得到总体积。
+流程图如图~\ref{gig:getVolume_pipeline}所示。
+\begin{figure}[H] % use float package if you want it here
+  \centering
+  \includegraphics[height=12cm]{getVolume_pipeline.png}
+  \caption{解算体积流程图}
+  \label{fig:getVolume_pipeline}
+\end{figure}
 \subsection{获取有效3D点集}
+\label{sec:4.4.1}
 通过第~\ref{cha:chap3}章的方法，可以对场景获取到三维稀疏点云和稠密点云，在生成点云的过程中会把部分非感兴趣区域的内容和一些
 离散的误差噪音点添加至点云结果中。针对这两种情况，本文分别提出以下对应的解决方法：\\
 1.	针对非感兴趣区域，本文通过三维空间平面方程对非感兴趣区域直接进行切割剔除；\\
@@ -240,39 +255,73 @@ Aruco二维码的布置都会有下侧两个角点直接落在水平面上，因
 \subsection{空间变换}
 \label{sec:4.4.2}
 通过上一小结，可以求出有效的3D点集，在本小节中需要将所有三维点云投影至二维平面上获取2D点集，简略步骤如下：\\
-1.	通过节获取点云水平面和参考坐标系中的xy平面的水平面的法向量P(A,B,C)和Q(0,0,1);\\
-2.	计算旋转角度：
+1.	通过~\ref{sec:4.2}节获取点云水平面和参考坐标系中的xy平面方程的法向量分别为U(A,B,C)和V(0,0,1);\\
+2.	将所有的3D点集O($x_o$,$y_o$,$z_o$)根据以下公式投影水平面上，获取新的3D点集P($x_p$,$y_p$,$z_p$)；
+\begin{equation}
+  \begin{split}
+  x_p=\frac{(B^2+C^2)x_o-A(By_o+Cz_o+D)}{A^2+B^2+C^2}\\
+  y_p=\frac{(A^2+C^2)y_o-B(Ax_o+Cz_o+D)}{A^2+B^2+C^2}\\
+  z_p=\frac{(A^2+B^2)z_o-C(Ax_o+By_o+D)}{A^2+B^2+C^2}
+  \label{equ:pxyz}
+  \end{split}
+\end{equation}
+同时也可以根据公式计算出每一个三维空间点到水平面的方程的距离
+\begin{equation}
+d\;=\frac{\left|Ax_0+By_0+Cz_0+D\right|}{\sqrt{A^2+B^2+C^2}}
+\end{equation}
+3.	计算旋转角度：
 \begin{equation}
 \theta=arc\cos(\frac{P\cdot Q}{\left|P\right|\left|Q\right|})
 \end{equation}
-3.	计算旋转轴：在计算旋转角时可知，旋转角所在的平面为有P和Q所构成的平面，那么旋转轴必垂直该平面。
+4.	计算旋转轴：在计算旋转角时可知，旋转角所在的平面为有P和Q所构成的平面，那么旋转轴必垂直该平面。
 假定旋转前向量为a($a_1$, $a_2$, $a_3$)， 旋转后向量为b（$b_1$, $b_2$, $b_3$)。由叉乘定义得旋转轴c($c_1$, $c_2$, $c_3$)为
 \begin{equation}
 \begin{pmatrix}c_1\\c_2\\c_3\end{pmatrix}=\begin{pmatrix}a_2b_3-a_3b_2\\a_3b_1-a_1b_3\\a_1b_2-a_2b_1\end{pmatrix}
 \end{equation}
-
-
-\subsection{获取Delauncy三角形}
+5.	根据罗德里格旋转公式将旋转角，旋转轴的表达转化为旋转矩阵R；\\
+6.	将3D点集P($x_p$,$y_p$,$z_p$)右乘上述旋转矩阵R可以得到一系列在同一平面上（所有转变后的点z值都相同）的3D点集，提取所有
+3D点的x,y值构成2D点集p($x$,$y$)。
+\subsection{获取Delaunay三角网}
 \label{sec:4.4.3}
-通过~\ref{sec:4.2}小结通过4.2小节，可以计算出三维重建后物体的水平面所在的平面方程，首先将需要计算出空间中每个
-点O($x_o$,$y_o$,$z_o$)投影在水平面方程上的投影坐标P($x_p$,$y_p$,$z_p$)，假设该三维空间水平面方程的一般形式
-如方程~\ref{equ:plane}，结合垂直约束，根据公式~\ref{equ:pxyz}可以计算出P的坐标为：
+通过~\ref{sec:4.2}小结，可以得到在由在同一平面上的3D点集转化成的2D点集和每一个2D点集对应的距离值d。在本节中将对2D点集进行
+三角剖分，获得Dealunay三角网，Delaunay三角网是一系列相连的但不重叠的三角形的集合, 而且这些三角形的外接圆不包含这个面域的其
+他任何点，如图~\ref{fig:getVolume_Delaunay}所示。
+\begin{figure}[H] % use float package if you want it here
+  \centering
+  \includegraphics[height=6cm]{getVolume_Delaunay.png}
+  \caption{Delaunay三角网示意图}
+  \label{fig:getVolume_Delaunay}
+\end{figure}
+获取Delaunay三角网格的一般步骤为：\\
+1.	构造一个超级三角形，包含所有散点，放入三角形链表;\\
+2.	将点集中的散点依次插入，在三角形链表中找出其外接圆包含插入点的三角形（称为该点的影响三角形），删除影响三角形的公共边，
+将插入点同影响三角形的全部顶点连接起来，从而完成一个点在Delaunay三角形链表中的插入;\\
+3.	根据优化准则对局部新形成的三角形进行优化。将形成的三角形放入Delaunay三角形链表;\\
+4.	循环执行上述第2步，直到所有散点插入完毕。\\
+由于Delaunay剖分具备具备最接近（以最近的三点形成三角形，且各线段(三角形的边)皆不相交）和区域性（新增、删除、移动某一个顶点
+时只会影响临近的三角形）的特性,可以对点集所构成的平面进行拟合。通过以上流程可以获得三角形的集合以及三角形中每个顶点对应的距
+离，取三个顶点距离的平均值作为三棱柱的高，每个三角形的面积按照公式~\ref{equ:tri_s}计算，即可获得所有三棱柱的体积。
 \begin{equation}
-\begin{split}
-x_p=\frac{(B^2+C^2)x_o-A(By_o+Cz_o+D)}{A^2+B^2+C^2}\\
-y_p=\frac{(A^2+C^2)y_o-B(Ax_o+Cz_o+D)}{A^2+B^2+C^2}\\
-z_p=\frac{(A^2+B^2)z_o-C(Ax_o+By_o+D)}{A^2+B^2+C^2}
-\label{equ:pxyz}
-\end{split}
+S_\bigtriangleup=\frac12\times\left(x_1y_2-x_1y_3+x_2y_3-x_2y_1+x_3y_1-x_2y_2\right)\label{equ:tri_s}
 \end{equation}
-通过上面的公式可以将三维点云中的所有点都投影在平面上，后续以该平面上的所有二维点
-
-同时也可以根据公式计算出每一个三维空间点到水平面的方程
+\subsection{积分三棱柱}
+\label{sec:4.4.4}
+通过以上步骤，可以将三维重建后点云体积的求解转化成对多个三棱柱积分的求解，因为所有三棱柱的体积值都分布在某一个区间内（并不完
+全服从正太分布），对于部分偏差较大的三棱柱体积值应该通过算法进行剔除。本文采用箱形图的方法来处理这一问题，箱形图不受异常值的
+影响，能够准确稳定地描绘出数据的离散分布情况，同时也利于数据的清洗。
+\begin{figure}[H] % use float package if you want it here
+  \centering
+  \includegraphics[height=6cm]{getVolume_boxplot.png}
+  \caption{Delaunay三角网示意图}
+  \label{fig:getVolume_boxplot}
+\end{figure}
+箱形图如图~\ref{fig:getVolume_boxplot}所示，主要需要求解出数据中的5个特征数据值，包
+括下四分位数Q1，上四分位数Q3，四分位距IQR=Q3-Q1，以及上限Q3+1.5IQR和下限Q1-1.5IQR，对于上下限之外的内容需要剔除，最终结
+合\label{sec:4.3}所估算出的尺度，以及所有有效三棱柱的体积按照公式~\ref{equ:get_volume}即可估计出物体中感兴趣区域的实际
+体积值。
 \begin{equation}
-d\;=\frac{\left|Ax_0+By_0+Cz_0+D\right|}{\sqrt{A^2+B^2+C^2}}
+  V\;=K^3\;\ast\sum_i\frac13\ast S_\bigtriangleup\times\sum_{j=1}^3d_j\label{equ:get_volume}
 \end{equation}
-
-
 
 
 
