@@ -137,7 +137,7 @@ Aruco二维码的布置都会有下侧两个角点直接落在水平面上，因
 功后的前两帧作为单位尺度，后续的所有关键帧都以此为参考确定尺度。这样的做法可以获取到地图中所有描述的绝对尺度，但无法计算出实
 际尺度，本文通过在场景中引入已知尺度的二维码来确定所构点云地图的真实尺度，主要针对同一场景，通过计算两种SLAM的相机位姿来确定
 相对尺度和绝对尺度之间的比例，从而确定绝对尺度。
-流程图如图~\ref{gig:getVolume_getK}所示。
+流程图如图~\ref{fig:getVolume_getK}所示。
 \begin{figure}[H] % use float package if you want it here
   \centering
   \includegraphics[height=12cm]{getVolume_getK.png}
@@ -217,7 +217,7 @@ Aruco二维码的布置都会有下侧两个角点直接落在水平面上，因
 2.	通过空间变换，将三维空间点转化为水平面上的点2D点集;\\
 3.	对所有点集求Delauncy三角形，计算每个三角形对应的水平高度，得到三棱柱体积；\\
 4.	剔除异常三棱柱，将所有有效的三棱柱积分求和得到总体积。
-流程图如图~\ref{gig:getVolume_pipeline}所示。
+流程图如图~\ref{fig:getVolume_pipeline}所示。
 \begin{figure}[H] % use float package if you want it here
   \centering
   \includegraphics[height=12cm]{getVolume_pipeline.png}
