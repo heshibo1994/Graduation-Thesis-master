@@ -243,9 +243,5 @@ N张原始图像的系统，时间复杂度高达O（$N^2$），由单帧图像�
   \label{fig:3d_constr_pipeline_sfm_mvs}
 \end{figure}
 首先基于在线SLAM结果建立粗糙Scene Graph及点云环境地图，以全局大尺度地图及运动轨迹为优化目标，使用鲁棒性更高的特征描述算子，
-利用高性能计算机的快速处理能力进行Global Bundle Adjustment全局优化，得到更加精确的全局稀疏地图和运动轨迹。然后利用MVS
-（Multi View Stereo）技术对图像中的高梯度变化区域建立半稠密环境地图。
-
-
-
-
+利用高性能计算机的快速处理能力进行Global Bundle Adjustment全局优化，得到更加精确
+的全局稀疏地图和运动轨迹。然后利用MVS（Multi View Stereo）技术对图像中的高梯度变化区域建立半稠密环境地图。
