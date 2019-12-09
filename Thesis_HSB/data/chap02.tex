@@ -195,6 +195,48 @@ SLAM是一个在导航的过程中，进行建图的工作，在使用单目相�
 符之间的距离比大于0.8,以及最小的描述符距离低于最低阈值$\tau_d$, 则与匹配成功。一旦所有的匹配都被计算出来，重复的匹配就会被移除。
 最终，关键点结合和检测到的二维码标记获得最终的精确位姿。
 
+对于相机的位姿估计，以
+\begin{equation}
+\Upsilon_{p}^{f}=\{(\mathbf{p}, \mathbf{f}, \mathbf{g})\}
+\end{equation}
+和
+\begin{equation}
+\Upsilon_{p}^{\mathrm{f}}=\left\{\left(\mathbf{m}, \mathbf{f}, \mathbf{c}_{\mathbf{m}, \mathbf{f}}\right)\right\}
+\end{equation}
+表示通过上述步骤得到的$\mathrm{f}$帧中地图点和二维码标记的观测值，对于该帧的位姿$\mathbf{f}_{\mathrm{T}}$可以通过最小化重投影误差来估计：
+\begin{equation}
+\mathbf{f}_{\mathrm{T}}=\underset{\mathrm{T}}{\operatorname{argmin}}\left(\mathbf{w}_{\mathbf{p}}^{\mathrm{f}} H\left(\Upsilon_{p}^{\mathrm{f}}, \mathrm{T}\right)+\mathbf{w}_{\mathbf{m}}^{\mathrm{f}} H\left(\Upsilon_{m}^{\mathrm{f}}, \mathrm{T}\right)\right)
+\label{equ:weight}
+\end{equation}
+其中
+\begin{equation}
+H\left(\Upsilon_{m}^{\mathrm{f}}, \mathrm{T}\right)=\sum_{\left(\mathrm{m}, \mathrm{f}, \mathrm{c}_{\mathrm{m}, \mathrm{f}}\right) \in \Upsilon_{m}^{\mathrm{f}}} \sum_{i=1}^{4}\left\|e\left(\mathrm{T} \cdot \mathbf{m}_{\mathrm{M}}, \mathbf{m}_{\mathrm{x}^{i}}, \mathbf{f}_{\delta}, \mathbf{c}_{\mathrm{m}, \mathrm{f}}^{i}\right)\right\|_{2}^{2}
+\end{equation}
+是当前帧观测到的二维码标记的重投影误差之和，其中
+\begin{equation}
+H\left(\Upsilon_{p}^{\mathrm{f}}, \mathrm{T}\right)=\sum_{(\mathbf{p}, \mathbf{f}, \mathbf{g}) \in \Upsilon_{p}^{\epsilon}} h_{\alpha}\left(e\left(\mathrm{T}, \mathbf{p}_{\mathbf{x}}, \mathbf{f}_{\delta}, \mathbf{g}_{u}\right) \Omega_{\mathbf{g}} e\left(\mathrm{T}, \mathbf{p}_{\mathbf{x}}, \mathbf{f}_{\delta}, \mathbf{g}_{u}\right)^{\top}\right)
+\end{equation}
+是当前帧观测到的地图点的重投影误差之和。对于Huber损失函数
+\begin{equation}
+h_{\alpha}(a)=\left\{\begin{array}{ll}{\frac{1}{2} a^{2}} & {\text { for }|a| \leq \alpha} \\ {\alpha\left(|a|-\frac{1}{2} \alpha\right)} & {\text { otherwise }}\end{array}\right.
+\end{equation}
+是为了降低优化过程中异常值的相对权重。
+
+对于公式~\ref{equ:weight},二维码标记和地图点的权重分别由
+$\mathbf{w}_{\mathbf{m}}^{\mathrm{f}}$
+和$\mathbf{w}_{\mathbf{p}}^{\mathrm{f}}$决定，因为同以帧中地图点的数量远远多于二维码的个数，所以必须平衡两者之间的权重，
+定义
+\begin{equation}
+\mathbf{w}_{\mathbf{p}}^{\mathbf{f}}=1-\mathbf{w}_{\mathbf{m}}^{\mathbf{f}}
+\end{equation}
+和
+\begin{equation}
+  \mathbf{w}_{\mathbf{m}}^{\mathbf{f}}=\frac{1}{2} \min \left(1, \frac{\mathbf{n}_{\mathbf{f}}}{\tau_{m}}\right)
+\end{equation}
+其中$\mathbf{n}_{\mathbf{f}}$代表追踪过程中该帧有效的二维码标记的个数，${\tau_{m}}$代表数量阈值，
+$\mathbf{w}_{\mathbf{m}}^{\mathbf{f}}$的值将介于$\left[0, \frac{1}{2}\right]$之间，假设在追踪的过程中，没有检测到有效
+的二维码，则$\mathbf{n}_{\mathbf{f}}$的值将为0，即该帧的位姿的结果将全部由地图点来估计。
+
 \textbf{插入关键帧：}关键帧只有在向系统添加新信息时才会添加到地图中，以便实现平稳可靠的跟踪。因此，必须设定一些规则来确定是
 否需要将当前帧添加至关键帧的集合。本文提出以下关键帧的提取规则:\\
 1.如果当前帧至少有一个新的二维码标记出现(该标记没有出现在原本的地图中)，则将该二维码和该帧添加到地图中。二维码是第一次在该帧
@@ -242,7 +284,7 @@ SLAM是一个在导航的过程中，进行建图的工作，在使用单目相�
 码标记，则利用该二维码来重新计算位姿，随后，通过查找地图对应关系和重新估计相机姿态来优化位姿。如果当前帧位姿不能从二维码标记
 中准确地估计出来，就使用关键帧结合数据库进行查询，查询与当前帧相似的关键帧，并分析最佳关键帧。在回环检测出中，将当前帧的关键
 帧与所选关键帧进行匹配，并采用RANSACPnP法估计相机的位姿T,如果内置点的数量足够高，则认为重新定位成功，系统重新进入跟踪模式。
-\section{坐标系统转换方法}
+\section{无人机定位系统设计}
 \label{sec:2.4}
 \subsection{坐标变换的数学描述}
 \label{sec:2.4.1}
@@ -337,29 +379,184 @@ T_{world}^{m} =\begin{bmatrix}T_{marker}^{w}\end{bmatrix}^{-1}
   % 		\ENDFOR
   % 	\end{algorithmic}
   % \end{algorithm}
-\subsection{完整流程}
+\subsection{无人机自主定位}
 \label{sec:2.4.3}
 根据以上章节，可以确定出在真实世界下相机的位姿结果，在具体的工程实践中，除了结合二维码的SLAM算法的研究，还需要考虑到先验地图
 的设定，数据的传输，相机的设定等问题，具体流程如图\ref{fig:getPose_pipeline}所示。
-
-\textbf{载入先验二维码地图：}根据实际世界坐标系中各个二维码的位姿情况，将其记录在配置文件中，包括每个二维码的实际尺度，
-ID值以及位姿情况。
-
-\textbf{设定SLAM参数：}对于结合二维码的SLAM系统，需要对系统中的参数进行设定，主要包括SLAM的运行模式（SLAM模式，重定位模式）
-，特征点的提取方式（orb、brief、SIFT等），二维码的检测类别（ARUCO\_MIP\_25h7、ARUCO\_MIP\_36h12等），关键帧筛选阈值，线程的数
-量，是否复用地图等等，这些SLAM相关的参数都需要在运行前设定。
-
-\textbf{设定相机参数：}相机的参数一般包括相机内参，以及曝光，快门时间和增益等，对于相机内参需要提前进行标定，后面三个参数
-需要根据实际场景调试后确定出最佳数值。
-
-\textbf{设定数据传输系统：}在工程实践中，一般都采用ROS（机器人操作系统）来对数据进行传输，其用于编写机器人软件程序的一种具备
-高灵活轻度的软件架构，可以使得数据在多个进程中进行传输，本文主要涉及SLAM进程和无人机飞控进程，这两个进程分别对同一个节点进行
-数据得到发布和订阅以完车数据传输。
-\begin{figure}[H] % use float package if you want it here
+\begin{figure}[t] % use float package if you want it here
   \centering
-  \includegraphics[height=14cm]{getPose_pipeline.png}
+  \includegraphics[height=14cm]{getPose_pipeline_1.png}
   \caption{获取真实位姿完整流程图}
   \label{fig:getPose_pipeline}
 \end{figure}
+
+
+\textbf{地图管理:}地图设定：在无人估计位姿时，如果有先验地图的加入，则可以添加约束进一步优化位姿结果。在载入地图的过程中，
+如果该场景是第一次测量，没有先验的地图信息，则创建一个空的global_map来存储地图信息，并将Map_Flag字段设定为NotFirst_Map；
+反之，则直接载入历史先验地图。在整个定位流程结束后，将更新后的地图保存在global_map中。
+\begin{lstlisting}[
+  language=C++,
+  numbers=left,                
+  numberstyle=\footnotesize,
+  frame=single,     
+  basicstyle=\small\tt,    
+  escapeinside = '',
+  caption={地图管理~C++~实现},
+  label={code:loadMarkermap}]
+'//载入地图'
+if (Map_Flag == NotFirst_Map) 
+	{globalmap->readFromFile(map_path);}
+else
+	{globalmap->readFromFile(map_path);
+	 Map_Flag == NotFirst_Map;
+	}
+	...
+	...
+	...
+'//保存地图'
+if (Map_Flag == Save_Map) 
+    {globalmap->saveToFile(map_path);}
+\end{lstlisting}
+
+\textbf{载入先验二维码地图：}载入先验二维码地图：首先准备先验地图配置文件，包括二维码的真实尺度，所有二维码的ID值，以及每一
+个二维码特定的id值和在真实世界坐标系下的位姿（R，t）。如代码~\ref{code:loadMarkermap}所示，需要依次遍历每个二维码的信息，
+最终将所有数据都存储在markermap中。
+\begin{lstlisting}[
+  language=C++,
+  numbers=left,                
+  numberstyle=\footnotesize,
+  frame=single,     
+  basicstyle=\small\tt,    
+  escapeinside = '',
+  caption={载入先验二维码地图~C++~实现},
+  label={code:loadMarkermap}]
+
+'先验地图配置文件：'
+  %YAML:1.0
+  markersize: 0.73
+  markers_id: [0,1]
+  id_0: !!opencv-matrix
+  rows: 4
+  cols: 4
+  dt: d
+  data: [1.0, 0.0, 0.0, 0.0, 
+        0.0, 1.0, 0.0, 0.0,  
+        0.0, 0.0, 1.0, 0.0, 
+        0.0, 0.0, 0.0, 1.0]
+  id_1: !!opencv-matrix
+  rows: 4
+  cols: 4
+  dt: d
+  data: [1.0, 0.0, 0.0, 4.0, 
+          0.0, 1.0, 0.0, 0.0,  
+          0.0, 0.0, 1.0, 0.0, 
+          0.0, 0.0, 0.0, 1.0]
+
+'先验地图载入代码：'
+  void loadMarkermap(string path){
+    cv::FileStorage fs(path, cv::FileStorage::READ);
+    fs["markersize"] >> markersize;
+    fs["markers_id"] >> markers_id;
+    for (std::size_t  i =0;i<markers_id.size();i++){
+        cv::Mat cvmarker ;
+        Eigen::Matrix<double,4,4> marker;
+        fs["id_"+to_string(markers_id[i])] >> cvmarker;
+        cv2eigen(cvmarker,marker);
+        markermap[markers_id[i]] = marker;
+    }
+  }
+\end{lstlisting}
+
+\textbf{设定SLAM参数：}对于结合二维码的SLAM系统，需要对系统中的参数进行设定，主要包括SLAM的运行模式（SLAM模式，重定位模式）
+，特征点的提取方式（orb、brief、SIFT等），二维码的检测类别（ARUCO\_MIP\_25h7、ARUCO\_MIP\_36h12等），关键帧筛选阈值，线程的数
+量，是否复用地图等等，这些SLAM相关的参数都需要在运行前设定,具体内容如代码~\ref{code:setSlam}所示。
+
+\begin{lstlisting}[
+  language=C++,
+  numbers=left,                
+  numberstyle=\footnotesize,
+  frame=single,     
+  basicstyle=\small\tt,    
+  escapeinside = '',
+  caption={slam启动和参数设置~C++~实现},
+  label={code:setSlam}]
+  void setSlam(int argc){
+      UcoSlamParams.runSequential=false;
+      UcoSlamParams.detectMarkers=true;
+      UcoSlamParams.aruco_markerSize=markersize;
+      UcoSlamParams.aruco_Dictionary="ARUCO_MIP_36h12";
+      UcoSlamParams.nthreads_feature_detector =1;
+  }
+\end{lstlisting}
+\textbf{设定相机参数：}相机的参数一般包括相机内参，以及曝光，快门时间和增益等，对于相机内参需要提前进行标定，后面三个参数
+需要根据实际场景调试后确定出最佳数值。
+
+
+\begin{lstlisting}[
+  language=C++,
+  numbers=left,                
+  numberstyle=\footnotesize,
+  frame=single,     
+  basicstyle=\small\tt,    
+  escapeinside = '',
+  caption={相机参数设定~C++~实现},
+  label={code:loadMarkermap}]
+  int SHUTTER=7 ; int BRIGHTNESS=0.5; float GAIN=20.0;
+  void setCamera(){
+    for (int frameNumber = 0; ;frameNumber++) {
+        char key = static_cast<char>(cv::waitKey(1));
+        if ( key =='w' || key == 'W') {break;}
+        if ( key =='u' || key == 'U'){SHUTTER =SHUTTER+1;}
+        if ( key =='j' || key == 'J'){SHUTTER =SHUTTER-1;}
+        if ( key =='i' || key == 'I'){BRIGHTNESS =BRIGHTNESS+1;}
+        if ( key =='k' || key == 'K'){BRIGHTNESS =BRIGHTNESS-1;}
+        if ( key =='o' || key == 'O'){GAIN =GAIN+1;}
+        if ( key =='l' || key == 'L'){GAIN =GAIN-1;}
+        mypointgrey->pointgreyInit(SHUTTER,BRIGHTNESS,GAIN);
+        mypointgrey->getData();
+    }
+  }
+\end{lstlisting}
+\textbf{设定数据传输系统：}在工程实践中，一般都采用ROS（机器人操作系统）来对数据进行传输，其用于编写机器人软件程序的一种具备
+高灵活轻度的软件架构，可以使得数据在多个进程中进行传输，本文主要涉及SLAM进程和无人机飞控进程，这两个进程分别对同一个节点进行
+数据得到发布和订阅以完车数据传输。
+\begin{lstlisting}[
+  language=C++,
+  numbers=left,                
+  numberstyle=\footnotesize,
+  frame=single,     
+  basicstyle=\small\tt,    
+  escapeinside = '',
+  caption={ROS初始化设定和数据传输~C++~实现},
+  label={code:loadMarkermap}]
+void publishPose(ros::Publisher odom_pub){
+    Eigen::Quaterniond q = Eigen::Quaterniond(t.block<3,3>(0,0));      
+    nav_msgs::Odometry odometry;
+    ros::Time current_time= ros::Time::now();
+    odometry.header.stamp = current_time;
+    odometry.header.frame_id = "world";
+    odometry.pose.pose.position.x = t(0,3);
+    odometry.pose.pose.position.y = t(1,3);
+    odometry.pose.pose.position.z = t(2,3);
+    odometry.pose.pose.orientation.x = q.x();
+    odometry.pose.pose.orientation.y = q.y();
+    odometry.pose.pose.orientation.z = q.z();
+    odometry.pose.pose.orientation.w = q.w();
+    odom_pub.publish(odometry);  
+    ros::spinOnce();        
+}
+
+for (int frameNumber = 0; keyPressed!=27;frameNumber++) {
+  ...\dots
+  publishPose(odom_pub);   
+}
+
+ros::init(argc, argv, "talker");  
+ros::NodeHandle n;  
+ros::Publisher odom_pub = 
+              n.advertise<nav_msgs::Odometry>("odom", 1000);      
+ros::Rate loop_rate(10);  
+\end{lstlisting}
+
 \section{本章小结}
 \label{sec:2.5}
