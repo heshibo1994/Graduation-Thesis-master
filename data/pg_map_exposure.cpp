@@ -197,6 +197,19 @@ int main(int argc, char **argv)
     return 0;
 }  
 
+//载入地图
+if (Map_Flag == NotFirst_Map) 
+	{globalmap->readFromFile(map_path);}
+else
+	{globalmap->readFromFile(map_path);
+	 Map_Flag == NotFirst_Map;
+	}
+	...
+	...
+	...
+//保存地图
+if (Map_Flag == Save_Map) 
+    {globalmap->saveToFile(map_path);}
 
 
 

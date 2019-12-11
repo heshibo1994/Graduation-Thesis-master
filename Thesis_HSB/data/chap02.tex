@@ -392,8 +392,8 @@ T_{world}^{m} =\begin{bmatrix}T_{marker}^{w}\end{bmatrix}^{-1}
 
 
 \textbf{地图管理:}地图设定：在无人估计位姿时，如果有先验地图的加入，则可以添加约束进一步优化位姿结果。在载入地图的过程中，
-如果该场景是第一次测量，没有先验的地图信息，则创建一个空的global_map来存储地图信息，并将Map_Flag字段设定为NotFirst_Map；
-反之，则直接载入历史先验地图。在整个定位流程结束后，将更新后的地图保存在global_map中。
+如果该场景是第一次测量，没有先验的地图信息，则创建一个空的globalmap来存储地图信息，并将MapFlag字段设定为NotFirstMap；
+反之，则直接载入历史先验地图。在整个定位流程结束后，将更新后的地图保存在globalmap中。
 \begin{lstlisting}[
   language=C++,
   numbers=left,                
@@ -405,14 +405,14 @@ T_{world}^{m} =\begin{bmatrix}T_{marker}^{w}\end{bmatrix}^{-1}
   label={code:loadMarkermap}]
 '//载入地图'
 if (Map_Flag == NotFirst_Map) 
-	{globalmap->readFromFile(map_path);}
+	{
+    globalmap->readFromFile(map_path);
+  }
 else
-	{globalmap->readFromFile(map_path);
-	 Map_Flag == NotFirst_Map;
+	{
+    globalmap->readFromFile(map_path);
+	  Map_Flag == NotFirst_Map;
 	}
-	...
-	...
-	...
 '//保存地图'
 if (Map_Flag == Save_Map) 
     {globalmap->saveToFile(map_path);}
@@ -488,9 +488,35 @@ if (Map_Flag == Save_Map)
       UcoSlamParams.nthreads_feature_detector =1;
   }
 \end{lstlisting}
-\textbf{设定相机参数：}相机的参数一般包括相机内参，以及曝光，快门时间和增益等，对于相机内参需要提前进行标定，后面三个参数
-需要根据实际场景调试后确定出最佳数值。
+\textbf{设定相机参数：}相机的选择对基于纯视觉的无人机定位任务也很重要，作为SLAM系统的输入，必须选择一台成像质量高，稳定性强的相机。在实际工程中选择PointGrey 
+（CM3-U3-31S4M-CS）工业相机来接受视觉信息，外形如图~\ref{fig:getPose_pt}所示，具体参数如表~\ref{tab:pointgrey}所示。
 
+相机在使用过程中需要设定的参数一般包括相机内参，以及曝光，快门时间和增益等，对于相机内参需要提前进行标定，后面三个参数需要根据实际场景调试后确定出最佳数值。
+\begin{figure}[H] % use float package if you want it here
+  \centering
+  \includegraphics[height=8cm]{getPose_pt.png}
+  \caption{PointGrey工业相机示意图}
+  \label{fig:getPose_pt}
+\end{figure}
+
+\begin{table}[h]
+  \centering
+  \caption{pointgrey相机参数表}
+  \label{tab:pointgrey}
+  \begin{tabular}{C{1.6cm}C{2.4cm}C{2.6cm}C{6.4cm}}
+  \toprule
+  \textbf{参数} & \textbf{数值} & \textbf{参数} & \textbf{数值} \\
+  \midrule
+  Frame Rate       & 30 FPS       & Megapixels      & 1.3 MP            \\
+  Lens Mount       & CS-mount     & Readout Method  & Global shutter           \\
+  Sensor Format    & 1/3"         & Chroma          & Color        \\
+  Sensor Type      & CCD 	        & Part Number     & CM3-U3-13S2C-CS           \\
+  Pixel Size       & 3.75 µm   	  & Sensor Name     & Sony ICX445      \\
+  Resolution       & 1288 × 964	  & Required Accessories & Lens, Cable, Host Adapter (USB 3.1 Gen 1), Tripod Mount Adapter (ACC-01-0003)        \\
+
+  \bottomrule
+  \end{tabular}
+\end{table}
 
 \begin{lstlisting}[
   language=C++,

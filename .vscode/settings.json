@@ -1,0 +1,88 @@
+{
+      "latex-workshop.latex.recipes": [
+      // {
+      //     "name": "xe->bibtex->xe->xe",
+      //     "tools": [
+      //     "xelatex",
+      //     "bibtex",
+      //     "xelatex",
+      //     "xelatex"
+      //     ]
+      // },
+      {
+          "name": "xe->biber->xe->xe",
+          "tools": [
+          "xelatex",
+          "biber",
+          "xelatex",
+          "xelatex"
+          ]
+      }
+      ],
+      
+      "latex-workshop.latex.tools": [
+      {
+          // 编译工具和命令
+          "name": "xelatex",
+          "command": "xelatex",
+          "args": [
+          "-synctex=1",
+          "-interaction=nonstopmode",
+          "--shell-escape",
+          "-file-line-error",
+          "-pdf",
+          "%DOC%"
+          ]
+      },
+      {
+          "name": "pdflatex",
+          "command": "pdflatex",
+          "args": [
+          "-synctex=1",
+          "-interaction=nonstopmode",
+          "-file-line-error",
+          "%DOC%"
+      ]
+      },
+      {
+          "name": "bibtex",
+          "command": "bibtex",
+          "args": [
+          "%DOCFILE%"
+          ]
+      },
+      {
+          "name": "biber",
+          "command": "biber",
+          "args": [
+          "%DOCFILE%"
+          ]
+      }
+      ],
+      
+      "latex-workshop.view.pdf.viewer": "external",
+      
+      "latex-workshop.view.pdf.external.viewer.command": "C:/Users/Administrator/Desktop/SumatraPDF-3.1.2-64-install.exe",
+      "latex-workshop.view.pdf.external.viewer.args": [
+          "%PDF%"
+      ],
+      
+      "latex-workshop.view.pdf.external.synctex.command": "C:/Users/Administrator/Desktop/SumatraPDF-3.1.2-64-install.exe",
+      "latex-workshop.view.pdf.external.synctex.args": [
+          "-forward-search",
+          "%TEX%",
+          "%LINE%",
+          "%PDF%"
+      ],
+      "latex-workshop.latex.autoClean.run": "onBuilt",
+      "latex-workshop.latex.autoBuild.run": "never",
+      "sync.gist": "9f99f7e085ab83f720b161038fc84f5b",
+      //"latex-workshop.view.pdf.viewer": "external",
+      // "[latex]": {
+      // "editor.defaultFormatter": "nickfode.latex-formatter"
+      // },
+      
+      }
+
+
+
