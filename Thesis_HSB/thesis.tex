@@ -27,7 +27,7 @@
 \graphicspath{{figures/}}
 
 
-%%% 封面部分
+%% 封面部分
 \frontmatter
 \input{data/cover}
 \makecover
@@ -48,9 +48,12 @@
 % 公式索引
 \listofequations
 
+
+
 %%% 正文 
 \mainmatter
 \include{data/chap01}
+\include{data/chapVSLAM}
 \include{data/chap02}
 \include{data/chap03}
 \include{data/chap04}
@@ -59,8 +62,8 @@
 %%% 其它部分
 %\backmatter
 
-% 致谢
-\begin{acknowledgement}时
+致谢
+\begin{acknowledgement}
 \input{data/ack}
 \end{acknowledgement}
 
