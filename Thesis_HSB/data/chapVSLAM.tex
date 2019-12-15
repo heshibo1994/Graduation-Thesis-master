@@ -3,7 +3,6 @@
 \section{引言}
 \label{sec:chapVSLAM.1}
 引言引言
-\section{图像处理}
 \section{相机模型}
 相机能够将三维世界中的坐标点映射到二维图像平面中，这个过程可以利用数学建立几何模型进行描述，此类模型有很多种， SLAM中最常用的模
 型为针孔模型。该模型描述了一束光通过针孔后，在针孔背面投影成像的关系，再同时考虑透镜的存在，会使得光线投影产生畸变，本文将利用针
@@ -272,3 +271,52 @@ $X_1$，$X_2$分别三维点P在两台相机坐标系下的坐标，则有：
 2.	依靠BoW词典，在关键帧集合中寻找到与当前帧相似的候选匹配帧\\
 3.	通过BoW匹配当前帧和每一个候选关键帧，通过PnP求解位姿\\
 4.	对以上位姿进行BA优化，当内点数量超过某一阈值时，则保留该关键帧，并通过反投影获取额外的地图点加入优化。\\
+\subsection{后端优化}
+上述说明都是属于SLAM的前端内容，和计算机视觉领域跟相关，本节所提出的SALM后端优化则主要考虑滤波和非线性优化问题。后端处理主要是
+指处理SLAM中的噪声影响问题，如何从噪声数据中估计出整个系统的状态。SLAM的后端处理一般分为两种方式，以扩展卡尔曼滤波为代表的滤波
+方法；以图优化为代表的非线性优化方法，目前主流的SLAM后端处理方法都是以图优化为主，本文也主要说明非线性优化算法。
+
+在图优化的视觉SLAM中，BA优化起到了主要作用，BA可以优化位姿和特征点的空间位置，其本质是最小化重投影误差。对于单目相机模型，满足：
+\begin{equation}
+  s_{i} \boldsymbol{u}_{i}=\boldsymbol{K} \exp \left(\boldsymbol{\xi}^{\wedge}\right) \boldsymbol{P}_{i}
+\end{equation}
+其中$\exp (\boldsymbol{\xi}^{\wedge})$为位姿的李代数形式,$ \boldsymbol{u}_{i}$为像素坐标。
+则最小化重投影误差可以写成：
+\begin{equation}
+  \xi^{*}=\arg \min _{\xi} \frac{1}{2} \sum_{i=1}^{n}\left\|u_{i}-\frac{1}{s_{i}} \boldsymbol{K} \exp \left(\boldsymbol{\xi}^{\wedge}\right) \boldsymbol{P}_{i}\right\|_{2}^{2}
+\end{equation}
+
+对于上述优化的求解方案，常用Ceres Solver非线性优化库和g2o图优化库。
+\textbf{Ceres：}需要自定义待优化问题，并设置选项参数，Ceres求解最小二乘问题的一般形式为：
+\begin{equation}
+  \begin{array}{ll}{\min _{x} \frac{1}{2} \sum_{i} \rho_{i}\left(\left\|f_{i}\left(x_{i_{1}}, \ldots, x_{i_{k}}\right)\right\|^{2}\right)} \\ {\text { s.t. } \quad l_{j}<x_{j}<u_{j}}\end{array}
+\end{equation}
+其中目标函为多各平方项经过核函数$\rho_{i}(.)$求和构成，代价函数为$f_i$，整个优化公式的边界条件为$[l_j,u_j]$。
+\begin{figure}[H] % use float package if you want it here
+  \centering
+  \includegraphics[height=6cm]{2VSLAM_g2o.png}
+  \caption{g2o模型}
+  \label{fig:2VSLAM_g2o}
+\end{figure}
+\textbf{g2o：}将优化问题表现成图，包含顶点和连接顶点的边，顶点代表优化变量，边代表误差项，上述BA问题也可以构成如图
+~\ref{fig:2VSLAM_g2o}所示的一个图结构，其中蓝色和绿色圆形分别代表待优化相机位姿和空间点坐标，方块代表各种先验知识，连线则代表
+约束。其数学表达为：
+\begin{equation}
+  \begin{aligned} \mathbf{F}(\mathbf{x}) &=\sum_{k \in \mathcal{C}} \underbrace{\mathbf{e}_{k}\left(\mathbf{x}_{k}, \mathbf{z}_{k}\right)^{\top} \Omega_{k} \mathbf{e}_{k}\left(\mathbf{x}_{k}, \mathbf{z}_{k}\right)}_{\mathbf{F}_{k}} \\ \mathbf{x}^{*} &=\underset{\mathbf{x}}{\operatorname{argmin}} \mathbf{F}(\mathbf{x}) \end{aligned}
+\end{equation}
+其中为总测量误差的平方和，g2o的目标就是求出使得测量误差平方最小的参数的值。
+\subsection{回环检测}
+在视觉SLAM中，对于相机位姿的解算都是由上一帧来计算的，那么这样就会造成误差的一直传递，产生累积误差，回环检测的提出就是通过建立
+当前帧和历史帧之间的关系以减少累积误差。词袋模型的提出可以快速简单地完成回环检测，词袋模型使得每一帧都可以用单词来描述，表达为：
+\begin{equation}
+  F=1 \cdot \omega_{1}+0 \cdot \omega_{2}+0 \cdot \omega_{3}+\ldots+1 \cdot \omega_{n-1}+0 \cdot \omega_{n}
+\end{equation}
+每一帧$q$都可以由单词$w$和权重$\eta$构成：
+\begin{equation}
+  A=\left\{\left(w_{1}, \eta_{1}\right),\left(w_{2}, \eta_{2}\right), \ldots,\left(w_{N}, \eta_{N}\right)\right\} \triangleq v_{A}
+\end{equation}
+可以通过计算$q$,$d$两帧之间字典的相似度判断是否构成回环:
+\begin{equation}
+  \begin{aligned} s\left(v_{q}, v_{d}\right) &=1-\frac{1}{2}\left|\frac{v_{q}}{\left|v_{q}\right|}-\frac{v_{d}}{\left|v_{d}\right|}\right| \\ &=\frac{1}{2} \sum_{i | q_{i} \neq 0, d_{i} \neq 0}\left(\left|v_{q i}\right|+\left|v_{d i}\right|-\left|v_{q i}-v_{d i}\right|\right) \end{aligned}
+\end{equation}
+一旦相似度得到某一个阈值，就认为构成回环,检测到回环后，就可以通过历史帧来计算当前帧的位姿以减小误差。

@@ -19,7 +19,7 @@
 
 %参考文献更新使用biblatex包, 使用gb7714-2015标准, 具体参数设置可在cls文件中搜索biblatex进行了解
 %加入bib文件(老版本文件依然能够使用)
-% \addbibresource{ref/refs.bib}   
+\addbibresource{ref/refs.bib}   
 
 \begin{document}
 
@@ -28,9 +28,9 @@
 
 
 %% 封面部分
-% \frontmatter
-% \input{data/cover}
-% \makecover
+\frontmatter
+\input{data/cover}
+\makecover
 
 
 % 目录
@@ -52,23 +52,22 @@
 
 %%% 正文 
 \mainmatter
-% \include{data/chap01}
+\include{data/chap01}
 \include{data/chapVSLAM}
-% \include{data/chap02}
-% \include{data/chap03}
-% \include{data/chap04}
-% \include{data/chap05}
-% \include{data/chap06}
+\include{data/chap02}
+\include{data/chap03}
+\include{data/chap04}
+\include{data/chap05}
+\include{data/chap06}
 %%% 其它部分
 %\backmatter
 
-致谢
-% \begin{acknowledgement}
-% \input{data/ack}
-% \end{acknowledgement}
+\begin{acknowledgement}
+\input{data/ack}
+\end{acknowledgement}
 
 % 参考文献
-% \printTJbibliography
+\printTJbibliography
 
 
 % 附录
@@ -77,8 +76,8 @@
 % \end{appendix}
 
 % 个人简历
-% \begin{resume}
-% \input{data/resume}
-% \end{resume}
+\begin{resume}
+\input{data/resume}
+\end{resume}
 
 \end{document}
