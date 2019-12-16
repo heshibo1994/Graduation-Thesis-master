@@ -1,8 +1,8 @@
-\chapter{真实世界坐标系下定位方法设计}
+\chapter{面向堆体测量的无人机自主定位研究}
 \label{cha:chap2}
 \section{引言}
 \label{sec:2.1}
-基于SLAM方法的即时建图和定位方法目前已经发展到的相当成熟，尤其是在无人机、无人车领域，基于视觉SLAM方法进行定位有着积
+基于SLAM方法的即时建图和定位方法目前已经发展到的相当成熟，尤其是在无人机领域，基于视觉SLAM方法进行定位有着积
 极地应用，对于实际落地的场景，该系统输出的相机位姿和构建的地图必须具备真实尺度才能够进行导航与定位，此外依靠视觉构建
 的地图所处坐标系往往取决于初始化成功后的第一帧多建立的坐标系，这些问题的存在都使得传统SLAM系统难以有实际的使用条件。
 
@@ -11,15 +11,15 @@
 相机标定难度大且精度不高，鲁棒性较差等问题；对于融合视觉和IMU传感器的SLAM系统，可以获取真实尺度，以及得到真实世界坐
 标系下的相机和地图位姿，但是该系统对于IMU的精度要求较高，且在引入IMU后容易产生累计误差，难以初始化成功等问题。
 
-针对上述问题，本章提出一种融合视觉传感器和二维码标签的单目视觉SLAM方法，在传统SLAM功能的基础上，可以得到相机和地图的
+针对上述问题，本章提出一种面向无人机自主定位的融合视觉传感器和二维码标签的单目视觉SLAM方法，在传统SLAM功能的基础上，可以得到相机和地图的
 真实尺度，并且根据一定的坐标转换，可以得到真实世界坐标系下的相机位姿和地图。在真实的应用场景中，布置的二维码和普通的自
 然关键点相比，更加容易捕捉到关键点，此外，比较固定，在重定位的流程中，往往会有更好的效果。该系统能够具备以下优良特性：
 能够对地图进行保存，复用和更新，通过不断完善的先验地图提高系统的鲁棒性；添加二维码信息增强传统SLAM中的重定位问题，此
 外通过二维码的尺度在仅适用单目相机的情况下估算出真实地图的尺度；依靠二维码中坐标系和真实世界的坐标系的转化，获取待估计
 物体在真实世界下的位姿。
-\section{二维码检测与识别方法}
+\section{二维码识别与使用方法研究}
 \label{sec:2.2}
-\subsection{二维码检测}
+\subsection{二维码检测与识别过程}
 \label{sec:2.2.1}
 二维码和一般的自然关键点相比较，具备比周围环境亮度更低得到的显著特点，如图~\ref{fig:Aruco_Aruco_Gradient}所示；且
 二维码本身是一个四边形的区域，可以凭借该特点约束出后续相机的位姿的绝对尺度；并且每一个二维码通过解码都可以获取到一个
@@ -27,16 +27,14 @@
 可能多的检出场景中的所有二维码，随后再通过编码对误检值进行剔除。
 \begin{figure}[H]
   \centering%
-  \subcaptionbox{ArUco二维码原始图像\label{fig:Aruco}}{%    
-    \includegraphics[height=6cm]{Aruco.png}}\hspace{6em}%
-  \subcaptionbox{ArUco二维码原始图像\label{fig:Aruco_Gradient}}{%    
+  \subcaptionbox{二维码原始图像\label{fig:Aruco}}{%    
+    \includegraphics[height=6cm]{Aruco.png}}\hspace{4em}%
+  \subcaptionbox{二维码原始图像\label{fig:Aruco_Gradient}}{%    
     \includegraphics[height=6cm]{Aruco_Gradient.png}}
-  \caption{ArUco二维码原始图像和梯度图}
+  \caption{二维码原始图像和梯度图}
   \label{fig:Aruco_Aruco_Gradient}
 \end{figure}
 
-\subsection{ArUco二维码的检测和识别过程}
-\label{sec:2.2.2}
 ArUco的检测和识别过程主要包括检测出二维码4个角点在图像中的位置，以及被检出的二维码的ID序号，在检测4个角点的位置时，
 需要检测图像中的线段和构成二维码的四边形。
 
@@ -53,12 +51,12 @@ ArUco的检测和识别过程主要包括检测出二维码4个角点在图像�
 所示。通过这样的方式检测和识别二维码具备非常好的鲁棒性，并且可以对错误值进行效验。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=8cm]{Aruco_detection.png}
-  \caption{ArUco二维码识别结果示意图}
+  \includegraphics[height=6cm]{Aruco_detection.png}
+  \caption{二维码识别结果示意图}
   \label{fig:Aruco_detection}
 \end{figure}
 
-\subsection{估计相机外参}
+\subsection{利用二维码估计相机外参}
 \label{sec:2.2.3}
 对于传入的单帧图像，在提取完二维码的四边形轮廓,4个角点以及检测对应的唯一ID值后，接下来会估计检出的二维码位姿，包括
 平移向量和旋转向量，相机的外参主要是通过PnP方法，利用4对点来求解。
@@ -94,12 +92,13 @@ b($u_b$ ,$v_b$)，c($u_c$ ,$v_c$)，d($u_d$ ,$v_d$)。因为相机的内参K提�
   -s/2\\s/2\\0\\1
   \end{array} \right ]}
 \end{split}
+\label{equ:mark2pose}
 \end{equation}
 
-通过以上公式，可以通过二维码到的四个角点求解出相机的旋转矩阵和平移矩阵。
-\section{基于二维码的SLAM系统描述}
+通过公式~\ref{equ:mark2pose}，可以通过二维码到的四个角点求解出相机的旋转矩阵和平移矩阵。
+\section{联合二维码的SLAM系统描述}
 \label{sec:2.3}
-\subsection{引入二维码的影响}
+\subsection{引入二维码对SLAM优化研究}
 \label{sec:2.3.1}
 SLAM是一个在导航的过程中，进行建图的工作，在使用单目相机时，即使目前表现较好的ORB-SLAM或者LDSO等算法也很难达到预期想要的效果，
 或者说存在很多的限制。第一个问题即是，所构成的地图的尺度是未知的，这样就造成无法在实际的导航任务中发挥作用，其次，在纯旋转的移
@@ -150,7 +149,7 @@ SLAM是一个在导航的过程中，进行建图的工作，在使用单目相�
 如图~\ref{fig:Ucoslam_map}所示，其中正方形代表检出的二维码，蓝色矩形代表检出关键帧，红色点代表检出关键点。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=8cm]{Ucoslam_map.png}
+  \includegraphics[height=6cm]{SLAM_Ucoslam_map.png}
   \caption{基于SLAM算法生成的地图}
   \label{fig:Ucoslam_map}
 \end{figure}
@@ -159,7 +158,7 @@ SLAM是一个在导航的过程中，进行建图的工作，在使用单目相�
 征点的关键帧的集合，以及在这些帧中出现的像素坐标位置。2）对于任意一个关键帧，还包与其关联的其他关键帧序列，以及在该关键帧中所
 有观测到的关键点和坐标。通过这些约束可以使得估计结果有更好的鲁棒性。
 
-\subsection{基于二维码的SLAM过程描述}
+\subsection{联合二维码的SLAM过程描述}
 \label{sec:2.3.3}
 本文所提出的基于二维码的SLAM系统运行流程如图~\ref{fig:slam_pipeline}所示，与一般常见SLAM系统相比较，本文主要提出了结合关键点和二维码标记进行结合
 使用。本方法中会一直对地图进行维护，有新的信息加入时，则会对地图进行不断的更新。在对某一个自然场景运行SLAM时，该地图为空，所
@@ -268,7 +267,23 @@ $\mathbf{w}_{\mathbf{m}}^{\mathbf{f}}$的值将介于$\left[0, \frac{1}{2}\right
 显著影响观察到的地图点的情况下会筛选掉，即某个关键帧中的地图点如果存在$\tau_c$的比例以上会被至少三个其他关键帧观测到，那
 么该帧会被被认为是冗余的，而使用其他三个关键帧代替。
 
-\textbf{回环检测和校准：}在SLAM的运行过程中，当相机机在环境中移动时，不可避免地会产生漂移，必须对其进行检测和校正。在系统中，
+\textbf{回环检测和校准：}
+在视觉SLAM中，对于相机位姿的解算都是由上一帧来计算的，那么这样就会造成误差的一直传递，产生累积误差，回环检测的提出就是通过建立
+当前帧和历史帧之间的关系以减少累积误差。词袋模型的提出可以快速简单地完成回环检测，词袋模型使得每一帧都可以用单词来描述，表达为：
+\begin{equation}
+  F=1 \cdot \omega_{1}+0 \cdot \omega_{2}+0 \cdot \omega_{3}+\ldots+1 \cdot \omega_{n-1}+0 \cdot \omega_{n}
+\end{equation}
+每一帧$q$都可以由单词$w$和权重$\eta$构成：
+\begin{equation}
+  A=\left\{\left(w_{1}, \eta_{1}\right),\left(w_{2}, \eta_{2}\right), \ldots,\left(w_{N}, \eta_{N}\right)\right\} \triangleq v_{A}
+\end{equation}
+可以通过计算$q$,$d$两帧之间字典的相似度判断是否构成回环:
+\begin{equation}
+  \begin{aligned} s\left(v_{q}, v_{d}\right) &=1-\frac{1}{2}\left|\frac{v_{q}}{\left|v_{q}\right|}-\frac{v_{d}}{\left|v_{d}\right|}\right| \\ &=\frac{1}{2} \sum_{i | q_{i} \neq 0, d_{i} \neq 0}\left(\left|v_{q i}\right|+\left|v_{d i}\right|-\left|v_{q i}-v_{d i}\right|\right) \end{aligned}
+\end{equation}
+一旦相似度得到某一个阈值，就认为构成回环,检测到回环后，就可以通过历史帧来计算当前帧的位姿以减小误差。
+
+在SLAM的运行过程中，当相机机在环境中移动时，不可避免地会产生漂移，必须对其进行检测和校正。在系统中，
 回环检测必须区分关键点和二维码标记，使用关键点进行闭环检测时，一旦添加一个新的关键帧时，系统会另开辟一个线程进入地图管理模式，
 因为SLAM系统会一直保留一个BoW数据库以检测是否插入关键帧，具体策略为: 测量最近添加的关键帧与图中相邻关键帧之间的相似性，保留
 最低的$s_min$，然后对数据库进行查询，得到最相似的非邻居关键帧，相似度大于$s_min$。对于符合闭环的每个候选项，将使用插入的关
@@ -286,38 +301,152 @@ $\mathbf{w}_{\mathbf{m}}^{\mathbf{f}}$的值将介于$\left[0, \frac{1}{2}\right
 帧与所选关键帧进行匹配，并采用RANSACPnP法估计相机的位姿T,如果内置点的数量足够高，则认为重新定位成功，系统重新进入跟踪模式。
 \section{无人机定位系统设计}
 \label{sec:2.4}
-\subsection{坐标变换的数学描述}
+\subsection{无人机相机坐标变换数学描述}
 \label{sec:2.4.1}
-在SLAM系统中，常用的坐标系存在2个概念，分别是相机坐标系和世界坐标系。其中世界坐标系是我们最需要考虑的一个坐标系，世界坐标系代
-表的是真实世界下，物体所参考的坐标系，一般都是固定不动的，可以给运动的物体提供控制方法，对于世界中的任意一点，可以描述
-为P($X_w$,$Y_w$,$Z_w$)。相机坐标系代表的是移动的物体自身的坐标系，由于相机是刚性物体，一般以相机的坐标为准，对于相机中的任何一点，可
-以描述为P($X_c$,$Y_c$,$Z_c$)。
+% 在SLAM系统中，常用的坐标系存在2个概念，分别是相机坐标系和世界坐标系。其中世界坐标系是我们最需要考虑的一个坐标系，世界坐标系代
+% 表的是真实世界下，物体所参考的坐标系，一般都是固定不动的，可以给运动的物体提供控制方法，对于世界中的任意一点，可以描述
+% 为P($X_w$,$Y_w$,$Z_w$)。相机坐标系代表的是移动的物体自身的坐标系，由于相机是刚性物体，一般以相机的坐标为准，对于相机中的任何一点，可
+% 以描述为P($X_c$,$Y_c$,$Z_c$)。
 
-因为SLAM系统中会涉及到多个坐标系，不同的坐标系之间需要进行转化，空间中点的坐标系变换是一个欧式变换，一般由旋转加平移构成。首先
-只考虑坐标的纯旋转问题，即只有旋转，没有平移产生，两个坐标系的基底分别为($\vec {e_1}$,$\vec {e_2}$,$\vec {e_3}$)和
-($\vec {e'_ 1}$,$\vec {e'_2}$,$\vec {e'_3}$)对应的坐标分别为($\vec {a_1}$,$\vec {a_2}$,$\vec {a_3}$)和($\vec {a'_1}$,$\vec {a'_2}$,$\vec {a'_3}$)。则有：
+% 因为SLAM系统中会涉及到多个坐标系，不同的坐标系之间需要进行转化，空间中点的坐标系变换是一个欧式变换，一般由旋转加平移构成。首先
+% 只考虑坐标的纯旋转问题，即只有旋转，没有平移产生，两个坐标系的基底分别为($\vec {e_1}$,$\vec {e_2}$,$\vec {e_3}$)和
+% ($\vec {e'_ 1}$,$\vec {e'_2}$,$\vec {e'_3}$)对应的坐标分别为($\vec {a_1}$,$\vec {a_2}$,$\vec {a_3}$)和($\vec {a'_1}$,$\vec {a'_2}$,$\vec {a'_3}$)。则有：
+% \begin{equation}
+% \begin{array}{l}\begin{bmatrix}\overrightarrow{e_1}&,\overrightarrow{e_2}&,\overrightarrow{e_3}\end{bmatrix}
+% \begin{bmatrix}a_1\\a_2\\a_3\end{bmatrix}=\begin{bmatrix}\overrightarrow{e_1'}&,\overrightarrow{e_2'}&,\overrightarrow{e_3'}\end{bmatrix}
+% \begin{bmatrix}a_1'\\a_2'\\a_3'\end{bmatrix}\\a\;=
+% \begin{bmatrix}a_1\\a_2\\a_3\end{bmatrix}\;=
+% \begin{bmatrix}e_1^Te_1'&e_1^Te_2'&e_1^Te_3'\\e_2^Te_1'&e_2^Te_2'&e_2^Te_3'\\e_3^Te_1'&e_3^Te_2'&e_3^Te_3'\end{bmatrix}
+% \begin{bmatrix}a_1'\\a_2'\\a_3'\end{bmatrix}=Ra'\\\end{array}
+% \end{equation}
+% 其中旋转矩阵R由两组基之间的内积组成，表示坐标系旋转前后同一个向量的坐标变换关系。旋转矩阵是一个行列式为1的正交矩阵,满足以下特点：
+% \begin{equation}RR^T=E(I),det(R)=I\end{equation}
+% 则有：
+% \begin{equation}a'=R^{-1}a=R^Ta\end{equation}
+% 在欧式变换中，除了旋转还有平移：
+% \begin{equation}a'=Ra+t\end{equation}
+% 可以用旋转矩阵R和平移向量t就能描述空间中的坐标变换关系
+% \begin{equation}
+% \begin{bmatrix}a'\\1\end{bmatrix}=
+% \begin{bmatrix}R&t\\0^T&1\end{bmatrix}
+% \begin{bmatrix}a\\1\end{bmatrix}=T
+% \begin{bmatrix}a\\1\end{bmatrix}
+% \end{equation}
+% 在三维向量的末尾添加1，称为齐次坐标。矩阵T同时包含了旋转和平移，称为变换矩阵。
+
+无人机上携带的相机可以看成三维空间中的刚体（保证了同一个向量在各个坐标系下的长度和夹角都不会发生变化）因此需要考虑相机的位姿，即旋转和平移。
+对于平移可以利用向量来表示，旋转则利用旋转矩阵，旋转向量，欧拉角，四元数等方式来描述，本文也将主要说明旋转过程的数学描述。
+
+\textbf{旋转矩阵:}对于任意向量{~p~}，在两个坐标系的描述为：
 \begin{equation}
-\begin{array}{l}\begin{bmatrix}\overrightarrow{e_1}&,\overrightarrow{e_2}&,\overrightarrow{e_3}\end{bmatrix}
-\begin{bmatrix}a_1\\a_2\\a_3\end{bmatrix}=\begin{bmatrix}\overrightarrow{e_1'}&,\overrightarrow{e_2'}&,\overrightarrow{e_3'}\end{bmatrix}
-\begin{bmatrix}a_1'\\a_2'\\a_3'\end{bmatrix}\\a\;=
-\begin{bmatrix}a_1\\a_2\\a_3\end{bmatrix}\;=
-\begin{bmatrix}e_1^Te_1'&e_1^Te_2'&e_1^Te_3'\\e_2^Te_1'&e_2^Te_2'&e_2^Te_3'\\e_3^Te_1'&e_3^Te_2'&e_3^Te_3'\end{bmatrix}
-\begin{bmatrix}a_1'\\a_2'\\a_3'\end{bmatrix}=Ra'\\\end{array}
+  \left[\mathbf{e}_{1}, \mathbf{e}_{2}, \mathbf{e}_{3}\right]\left[\begin{array}{l}{a_{1}} \\ {a_{2}} \\ {a_{3}}\end{array}\right]=\left[\mathbf{e}_{1}^{\prime}, \mathbf{e}_{2}^{\prime}, \mathbf{e}_{3}^{\prime}\right]\left[\begin{array}{c}{a_{1}^{\prime}} \\ {a_{2}^{\prime}} \\ {a_{3}^{\prime}}\end{array}\right]
 \end{equation}
-其中旋转矩阵R由两组基之间的内积组成，表示坐标系旋转前后同一个向量的坐标变换关系。旋转矩阵是一个行列式为1的正交矩阵,满足以下特点：
-\begin{equation}RR^T=E(I),det(R)=I\end{equation}
-则有：
-\begin{equation}a'=R^{-1}a=R^Ta\end{equation}
-在欧式变换中，除了旋转还有平移：
-\begin{equation}a'=Ra+t\end{equation}
-可以用旋转矩阵R和平移向量t就能描述空间中的坐标变换关系
+
+等式两边同时左乘$\left[\begin{array}{ccc}{\mathbf{e}_{1}^{T},} & {\mathbf{e}_{2}^{T},} & {\mathbf{e}_{3}^{T}}\end{array}\right]^{T}$可得
 \begin{equation}
-\begin{bmatrix}a'\\1\end{bmatrix}=
-\begin{bmatrix}R&t\\0^T&1\end{bmatrix}
-\begin{bmatrix}a\\1\end{bmatrix}=T
-\begin{bmatrix}a\\1\end{bmatrix}
+\left[\begin{array}{l}{a_{1}} \\ {a_{2}} \\ {a_{3}}\end{array}\right]=\left[\begin{array}{lll}{e_{1}^{T} e_{1}^{\prime}} & {e_{1}^{T} e_{2}^{\prime}} & {e_{1}^{T} e_{3}^{\prime}} \\ {e_{2}^{T} e_{1}^{\prime}} & {e_{2}^{T} e_{2}^{\prime}} & {e_{2}^{T} e_{3}^{\prime}} \\ {e_{3}^{T} e_{1}^{\prime}} & {e_{3}^{T} e_{2}^{\prime}} & {e_{3}^{T} e_{3}^{\prime}}\end{array}\right]\left[\begin{array}{c}{a_{1}^{\prime}} \\ {a_{2}^{\prime}} \\ {a_{3} ;}\end{array}\right]=\mathbf{R a}^{\prime}
 \end{equation}
-在三维向量的末尾添加1，称为齐次坐标。矩阵T同时包含了旋转和平移，称为变换矩阵。
+
+对于旋转矩阵R，即可描述旋转过程，并且R可以定义为特殊正交群：
+\begin{equation}
+  S O(n)=\left\{\mathbf{R} \in R^{n \times n} | \mathbf{R} \mathbf{R}^{T}=\mathbf{I}, \operatorname{det}(\mathbf{R})=1\right\}
+\end{equation}
+
+\textbf{旋转向量：}旋转矩阵在描述旋转时存在参数冗余和自身约束的问题，因此提出一个更加紧凑的数学描述$\theta_{n}$，旋转向量方向为旋转轴{~n~}，
+大小为旋转角$\theta$。旋转向量和旋转矩阵的转换可以用罗德里格斯公式表示：
+\begin{equation}
+  \mathbf{R}=\cos \theta \mathbf{I}+(1-\cos \theta) \mathbf{n} \mathbf{n}^{T}+\sin \theta \mathbf{n}^{\wedge}
+\end{equation}
+
+反之则有
+\begin{equation}
+  \operatorname{tr}(\mathbf{R})=\cos \theta \operatorname{tr}(\mathbf{I})+(1-\cos \theta) \operatorname{tr}\left(\mathbf{n} \mathbf{n}^{T}\right)+\sin \theta \operatorname{tr}\left(\mathbf{n}^{\wedge}\right)=1+2 \cos \theta
+\end{equation}
+
+\textbf{欧拉角：}将旋转运动分解成分别绕三个坐标轴的旋转（$[r, p, y]^{T}$）来表示的，三个旋转的总和即为总的旋转，表述最为直观。
+
+\textbf{四元数：}由于欧拉角和旋转向量存在奇异性，且不存在不带奇异性的三维向量描述方式，因此提出四元数这种紧凑且没有奇异性的数学
+描述。四元数可以描述为：
+\begin{equation}
+  \mathbf{q}=q_{0}+q_{1} i+q_{2} j+q_{3} k=\{s, \mathbf{v}\}
+\end{equation}
+可以用单位四元数来描述空间中的任意旋转，假设旋转的描述为$\theta_{n}$，则：
+\begin{equation}
+  \mathbf{q}=\left[\cos \frac{\theta}{2}, n_{x} \sin \frac{\theta}{2}, n_{y} \sin \frac{\theta}{2}, n_{z} \sin \frac{\theta}{2}\right]^{T}
+\end{equation}
+旋转描述为R时，则：
+\begin{equation}
+\mathbf{R}=\left[\begin{array}{ccc}{1-2 q_{2}^{2}-2 q_{3}^{2}} & {2 q_{1} q_{2}-2 q_{0} q_{3}} & {2 q_{1} q_{3}+2 q_{0} q_{2}} \\ {2 q_{1} q_{2}+2 q_{0} q_{3}} & {1-2 q_{1}^{2}-2 q_{3}^{2}} & {2 q_{2} q_{3}-2 q_{0} q_{1}} \\ {2 q_{1} q_{3}-2 q_{0} q_{2}} & {2 q_{2} q_{3}+2 q_{0} q_{1}} & {1-2 q_{1}^{2}-2 q_{2}^{2}}\end{array}\right]
+\end{equation}
+反之则有：
+\begin{equation}
+  q_{0}=\frac{\sqrt{\operatorname{tr}(\mathbf{R})+1}}{2}, q_{1}=\frac{m_{23}-m_{32}}{4 q_{0}}, q_{2}=\frac{m_{31}-m_{13}}{4 q_{0}}, q 3=\frac{m_{12}-m_{21}}{4 q_{0}}
+\end{equation}
+通过以上方式都可以描述刚性运动中的旋转过程R，结合物体的平移t，则变化后的坐标为：
+\begin{equation}
+  \mathbf{a}^{\prime}=\mathbf{R} \mathbf{a}+\mathbf{t}
+\end{equation}
+
+在实际的使用中，由于以上等式非线性，可以引入齐次坐标T，可以将上式改成：
+\begin{equation}
+\left[\begin{array}{l}{\mathbf{a}^{\prime}} \\ {1}\end{array}\right]=\left[\begin{array}{ll}{\mathbf{R}} & {\mathbf{t}} \\ {\mathbf{0}^{T}} & {1}\end{array}\right]\left[\begin{array}{l}{\mathbf{a}^{\prime}} \\ {1}\end{array}\right]=\mathbf{T}\left[\begin{array}{l}{\mathbf{a}} \\ {1}\end{array}\right]
+\end{equation}
+
+对于变换矩阵T，可以定义为特殊欧氏群：
+\begin{equation}
+S E(3)=\left\{T=\left[\begin{array}{cc}{\mathbf{R}} & {\mathbf{t}} \\ {\mathbf{0}^{T}} & {1}\end{array}\right] \in R^{4 \times 4} | \mathbf{R} \in S O(3), t \in R^{3}\right\}
+\end{equation}
+
+对于针孔相机模型，如图~\ref{fig:2VSLAM_pinehole}所示，（其中f为相机焦距）存在4个坐标系分别为：世界坐标系，相机坐标系，图像坐
+标系和像素坐标系，对于真实世界中的空间点$P_w$（$X_w$，$Y_w$，$Z_w$），其对应的相机坐标系坐标为$P_c$（$C_w$，$C_w$，$C_w$）,
+对应的图像坐标系为$P^{'}$（$X^{'}$,$Y^{'}$），对应的像素坐标系为p（u，v）。
+\begin{figure}[H] % use float package if you want it here
+  \centering
+  \includegraphics[height=6cm]{2VSLAM_pinehole.png}
+  \caption{针孔相机模型}
+  \label{fig:2VSLAM_pinehole}
+\end{figure}
+对于世界坐标系到相机坐标系之间的转化：
+\begin{equation}
+  \left[\begin{array}{l}{X c} \\ {Y_{C}} \\ {Z_{C}}\end{array}\right]=R\left[\begin{array}{l}{X w} \\ {Y w} \\ {Z w}\end{array}\right]+t
+  \label{equ:world2cam}
+\end{equation}
+对于相机坐标系到图像坐标系之间的转化，可以利用如图~\ref{fig:2VSLAM_similartri}所示的相似三角形来求解:
+\begin{equation}
+  \begin{split}
+    \frac{Z c}{f}=\frac{X c}{X^{'}}=\frac{Y c}{Y^{'}}\\
+    \left\{\begin{array}{l}{X^{\prime}=f \frac{X c}{Z c}} \\ {Y^{\prime}=f \frac{Y c}{Z c}}\end{array}\right.
+\end{split}
+\label{equ:cam2photo}
+\end{equation}
+对于图像坐标系到像素坐标系的转化，如图~\ref{fig:2VSLAM_pixeltrans}所示:
+\begin{equation}
+  \begin{split}
+    \left\{\begin{array}{l}{u=\frac{X^{\prime}}{d_{x}}+u_{o}} \\ {v=\frac{Y^{\prime}}{d_{y}}+v_{o}}\end{array}\right.\\
+    \left[\begin{array}{l}{u} \\ {v} \\ {1}\end{array}\right]=\left[\begin{array}{ccc}{\frac{1}{d_{x}}} & {0} & {u_{o}} \\ {0} & {\frac{1}{d_{x}}} & {v_{o}} \\ {0} & {0} & {1}\end{array}\right]\left[\begin{array}{c}{X^{\prime}} \\ {Y^{\prime}} \\ {1}\end{array}\right]
+  \end{split}
+  \label{equ:photo2pixel}
+\end{equation}
+\begin{figure}[H]
+  \centering%
+  \subcaptionbox{相机坐标系到图像坐标系转换\label{fig:2VSLAM_similartri}}{%    
+    \includegraphics[height=4cm]{2VSLAM_similartri.png}}\hspace{6em}%
+  \subcaptionbox{图像坐标系到像素坐标系转换\label{fig:2VSLAM_pixeltrans}}{%    
+    \includegraphics[height=4cm]{2VSLAM_pixeltrans.png}}
+  \caption{坐标系转化示意图}
+  \label{fig:trans}
+\end{figure}
+其中$d_x$,$d_y$分别表示沿着x,y轴的实际物理尺寸，（$u_o$,$v_o$）表示光心对应到像素坐标系得到坐标.由公式~\ref{equ:cam2photo}和
+~\ref{equ:photo2pixel}可以转化得到相机坐标系到像素坐标系的关系：
+\begin{equation}
+Z c\left[\begin{array}{l}{u} \\ {v} \\ {1}\end{array}\right]=\left[\begin{array}{ccc}{\frac{f}{d_{x}}} & {0} & {u_{0}} \\ {0} & {\frac{f}{d_{y}}} & {v_{0}} \\ {0} & {0} & {1}\end{array}\right]\left[\begin{array}{c}{X_{c}} \\ {Y_{c}} \\ {Z_{c}}\end{array}\right]=\left[\begin{array}{ccc}{f_{x}} & {0} & {u_{0}} \\ {0} & {f_{y}} & {v_{0}} \\ {0} & {0} & {1}\end{array}\right]\left[\begin{array}{c}{X_{c}} \\ {Y_{c}} \\ {Z_{c}}\end{array}\right]=K\left[\begin{array}{c}{X_{c}} \\ {Y_{c}} \\ {Z_{c}}\end{array}\right]
+  \label{equ:cam2pixel}
+\end{equation}
+由公式~\ref{equ:world2cam}和~\ref{equ:cam2pixel}得到世界坐标系到像素坐标系的转化关系为:
+\begin{equation}
+Z c\left[\begin{array}{l}{u} \\ {v} \\ {1}\end{array}\right]=K(R P w+t)=K\left(R\left[\begin{array}{l}{X w} \\ {Y w} \\ {Z w}\end{array}\right]+t\right)
+\end{equation}
+其中K表示相机内参矩阵，R，t表示相机外参。
 \subsection{获取真实世界坐标系方法}
 \label{sec:2.4.2}
 在SLAM系统中所描述的定位信息都是基于地图坐标系或者相机坐标系，但是在实际的应用中，就需要将所有的定位信息全部转换至真实世界坐标系，
@@ -346,7 +475,7 @@ T_{world}^{m} =\begin{bmatrix}T_{marker}^{w}\end{bmatrix}^{-1}
 标为（0,0,0），其余二维码则可以按照真实尺度获取。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=8cm]{Aruco_global.png}
+  \includegraphics[height=6cm]{Aruco_global.png}
   \caption{二维码布置示意图}
   \label{fig:Aruco_global}
 \end{figure}
@@ -379,7 +508,7 @@ T_{world}^{m} =\begin{bmatrix}T_{marker}^{w}\end{bmatrix}^{-1}
   % 		\ENDFOR
   % 	\end{algorithmic}
   % \end{algorithm}
-\subsection{无人机自主定位}
+\subsection{无人机自主定位设计}
 \label{sec:2.4.3}
 根据以上章节，可以确定出在真实世界下相机的位姿结果，在具体的工程实践中，除了结合二维码的SLAM算法的研究，还需要考虑到先验地图
 的设定，数据的传输，相机的设定等问题，具体流程如图\ref{fig:getPose_pipeline}所示。
@@ -494,7 +623,7 @@ if (Map_Flag == Save_Map)
 相机在使用过程中需要设定的参数一般包括相机内参，以及曝光，快门时间和增益等，对于相机内参需要提前进行标定，后面三个参数需要根据实际场景调试后确定出最佳数值。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=8cm]{getPose_pt.png}
+  \includegraphics[height=6cm]{getPose_pt.png}
   \caption{PointGrey工业相机示意图}
   \label{fig:getPose_pt}
 \end{figure}
@@ -586,3 +715,8 @@ ros::Rate loop_rate(10);
 
 \section{本章小结}
 \label{sec:2.5}
+本章阐述了二维码的检测和识别原理，通过线条和角点的检测，在检测出二维码所在区域的同时识别出每一个二维码对应的ID值，推导出通过二维码解算相机位姿的流程。
+
+然后重点研究了在SLAM的流程中引入二维码的影响，解决了单目视觉SLAM在无人机自主定位工作中，无法确定尺度和不能确定坐标系的问题，分析了SLAM地图的描述情况，包括关键点，关键帧以及二维码的属性，并结合二维码分析了SLAM的整体流程。
+
+最后本文设计了一种为无人机在封闭环境中的自主定位方案，包括地图管理，图像处理，无人机位姿信息传递等模块，模块之间相互协作，为无人机提供准确的位姿数据，供其后续进行循迹飞行。在无人机飞行的过程中，采集堆体的图像信息，为后续的堆体三维重建以及体积测量提供支持。
