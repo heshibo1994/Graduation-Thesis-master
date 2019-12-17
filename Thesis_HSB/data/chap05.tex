@@ -250,7 +250,7 @@
   \label{fig:getVolume_3dconstr}
   \end{figure}
 
-\subsection{估计场景实际尺度}
+\subsection{估计堆体实际尺度}
 \label{sec:5.4.2}
 1.	获取绝对尺度:根据图~\ref{fig:getVolume_Kabs}所示,分别可以获得在ID = 43的二维码坐标系下的相机位姿，如表~\ref{tab:chap1:2D_3D}
 前两行，可以计算出在这两帧之间相机移动的绝对距离为0.464m。
@@ -280,3 +280,56 @@
 
 3.	估计尺度：按照公式~\ref{equ:getVolume_K}可以简略估计出该煤堆场景实际大小和三维重建结果的尺度大小之间的尺因子
 K = 10.61。
+\subsection{堆体体积估计}
+针对体积测量实验，本文拟采用如下方式验证所提方法是否能够测量出堆体体积，以及是否满足精度要求：首先使用测量仪器检测出待测堆体
+的实际体积真值，随后将堆体分别摆放成单个堆体，两个堆体，三个堆体的形式，按照第~\ref{cha:chap4}章的流程，检测三次实验是否和
+真值之间的误差衡量视觉算法的精确度，以及三次测量值之间的数值比较，衡量视觉算法测量的稳定性。具体步骤如下：\\
+1. 将某一堆体放置在水平面上，并在堆体周围放置5个二维码以估计尺度和水平面方程。\\
+2. 对上述场景以视频的形式进行图像采集，提取视频中的图像，将数据集的数量控制在200张左右，且每张图像的分辨率在50万左右。\\
+3. 对上述采集到的图像进行二维码检测与识别，记录下每张图像中的二维码ID以及角点坐标。。\\
+4. 对上述采集到的图像进行稀疏重建，记录下稀疏点云中的3D点和每张图像角点之间的映射关系。\\
+5. 按照~\ref{sec:4.2}估计堆体出水平面方程。\\
+6. 按照~\ref{sec:4.3}估计出堆体的尺度大小。\\
+7. 对稀疏点云进行稠密重建，并将所求解出的水平面方程添加至稠密点云中。\\
+8. 按照~\ref{sec:4.4}估计出当前堆体的体积大小。\\
+9. 将单个堆体分别设计成2个堆体和3个堆体的情况，重复步骤2$~$8，计算不同场景对应的体积。\\
+10 根据结果定量分析上述视觉算法测量堆体的准确性和稳定性。
+
+结果如表~\ref{tab:volume_test}所示。
+\begin{table}[h]
+  \centering
+  \caption{堆体体积估计实验结果表}
+  \label{tab:volume_test}
+  \resizebox{\textwidth}{!}{
+      \Rotatebox{90}{
+  \begin{tabular}{@{}lccc@{}}
+  \toprule
+  \textbf{序号} & \textbf{1} & \textbf{2} & \textbf{3} \\
+  \midrule
+  图像集数量 &	186&	202&	197\\
+  图像分辨率 &	960*455&	960*455&	960*45\\
+  场景预览   
+  & \includegraphics[width=7.5cm, height=5cm]{getVolume_3dconstr_1.png}
+  & \includegraphics[width=7.5cm, height=5cm]{getVolume_3dconstr_1.png}
+  & \includegraphics[width=7.5cm, height=5cm]{getVolume_3dconstr_1.png}    \\
+  稀疏点云    
+  & \includegraphics[width=7.5cm, height=5cm]{getVolume_3dconstr_1.png}
+  & \includegraphics[width=7.5cm, height=5cm]{getVolume_3dconstr_1.png}
+  & \includegraphics[width=7.5cm, height=5cm]{getVolume_3dconstr_1.png}    \\
+  尺度$K$&	2.4&	3.9&	4.6\\
+  平面方程$\pi$& $2x+3y=0$&2x+3y=0&2x+3y=0\\
+  稠密点云    
+  & \includegraphics[width=7.5cm, height=5cm]{getVolume_3dconstr_1.png}
+  & \includegraphics[width=7.5cm, height=5cm]{getVolume_3dconstr_1.png}
+  & \includegraphics[width=7.5cm, height=5cm]{getVolume_3dconstr_1.png}    \\
+  计算耗时\\(s)&	634&	585&	565\\
+  计算结果\\($cm^3$)&	13149&	12879&	12830\\
+  误差&	1.1$\%$&	0.9$\%$&	1.3$\%$\\
+  \bottomrule
+  \end{tabular}
+      }
+  }
+\end{table}
+
+\section{本章小结}
+本章分模块测试了无人机在非GPS场景下依靠纯视觉进行定位的效果与精度，以及改进后的三维重建的效果和基于纯视觉的堆体体积测量算法的准确度和稳定性。
