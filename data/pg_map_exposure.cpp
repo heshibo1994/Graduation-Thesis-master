@@ -213,5 +213,23 @@ if (Map_Flag == Save_Map)
 
 
 
+if (mpCurrentKeyFrame->mnId > 4)
+  {
+
+   std::vector<KeyFrame*> cos = mpCurrentKeyFrame->GetBestCovisibilityKeyFrames(covisibleNum);
+   cv::Mat rotation = mpCurrentKeyFrame->GetRotation();
+   cv::Mat translation = mpCurrentKeyFrame->GetTranslation();
+
+   Eigen::Matrix3d r2 = Converter::toMatrix3d(rotation);
+   Eigen::Quaterniond q2(r2);
+
+   fs1 << mpCurrentKeyFrame->mnFrameId << " ";
+   for (int k = 0; k < cos.size(); k++)
+   {
+    fs1 << cos[k]->mnFrameId << " ";
+   }
+
+   fs1 << "| " << q2.w() << " " << q2.x() << " " << q2.y() << " " << q2.z() << " " << translation.at<float>(0) << " " << translation.at<float>(1) << " " << translation.at<float>(2) << std::endl;
+  }
 
 

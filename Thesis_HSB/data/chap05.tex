@@ -13,19 +13,15 @@
 
 首先是场景布置，选择在空旷场地中，布置二维码视觉标签，保证每个二维码的尺度大小完全一致，且二维码之间尽可能等间距布置，场景中的
 二维码ID完全独立不同，设计图和实际布置图分别如图~\ref{fig:scene_imagine}和图~\ref{fig:scene_reality}所示。在本次实验中，所原选择的二维码实际大小为0.73m，相邻二维码之间的距
-离为4m，整个实验区域面积为400m2（20m*20m）。
-
-\begin{figure}[H] % use float package if you want it here
-  \centering
-  \includegraphics[height=8cm]{scene_imagine.png}
-  \caption{实验场景设计示意图}
-  \label{fig:scene_imagine}
-\end{figure}
-\begin{figure}[H] % use float package if you want it here
-  \centering
-  \includegraphics[height=8cm]{scene_reality.png}
-  \caption{实验场景真实布置图}
-  \label{fig:scene_reality}
+离为4m，整个实验区域面积为400$m^2$（20m*20m）。
+\begin{figure}[H]
+  \centering%
+  \subcaptionbox{实验场景设计示意图\label{fig:scene_imagine}}{%    
+    \includegraphics[height=6cm,width=6cm]{scene_imagine.png}}\hspace{4em}%
+  \subcaptionbox{实验场景真实布置图\label{fig:scene_reality}}{%    
+    \includegraphics[height=6cm,width=6cm]{scene_reality.png}}
+  \caption{实验场景示意图}
+  \label{fig:scene}
 \end{figure}
 
 在布置好场景后，需要根据实际场景生成地图信息。当无人机首次在无先验地图的环境下飞行时，需要人工手动控制，完成无人机的飞行和地图
@@ -133,7 +129,7 @@
 其次对于无人机三维坐标的精度，以无人机自带GPS测距仪器测定出的坐标为真值，和视觉算法计算出来的位置信息进行对比，选择无人机
 在0-800帧的数据，在X、Y、Z方向得到的结果分别如图~\ref{fig:chap2:pose_xyz}所示,其中蓝色连线为视觉算法检测出的坐标值，红色
 连线无人机GPS检测出的真实值。
-\begin{figure}[htbp]
+\begin{figure}[h]
   \centering
     \subcaptionbox{X方向GPS和视觉算法对比图}{\label{fig:chap1:pose_x}
     \includegraphics[width=6cm]{pose_x.png}\hskip2cm}
@@ -174,8 +170,124 @@
 
 
 
-\section{三维重建系统系统测试}
+\section{三维重建系统测试}
 \label{sec:5.3}
+在本文~\ref{sec:3.2.3}节中，提出了三维重建存在的一些问题，包括对场景进行三维重建时，匹配耗时严重和点云准确性较低，甚至无法重建出三维点云，
+本实验将结合~\ref{sec:3.3}节提出的方法对三维重建进行改进。
+\subsection{匹配实效性测试}
+通过~\ref{sec:3.3.2}节对输入图像匹配模式的分析，本实验共选择150张图像（图片选择过少的话，各匹配模式之间的耗时差异会过小）作为输入图片，每
+张图像的大小为960*544。各匹配模式包括完全匹配，序列匹配，空间匹配，传递匹配和自定义匹配，对于空间匹配，在对室内堆体三维重建时，难以获取准确的空间位置信息，本实验将排除该匹配方式的对比
+其中自定义匹配以实时运行的SLAM匹配信息作为匹配结果。SLAM处理代码如~\ref{code:SLAM_process}下：
+\begin{lstlisting}[
+  language=C++,
+  numbers=left,                
+  numberstyle=\footnotesize,
+  frame=single,     
+  basicstyle=\small\tt,    
+  escapeinside = '',
+  caption={SLAM处理数据集~C++~实现},
+  label={code:SLAM_process}]
+'//SLAM处理数据集'
+
+if (mpCurrentKeyFrame->mnId > 4)
+  {
+
+   std::vector<KeyFrame*> cos = 
+    mpCurrentKeyFrame->GetBestCovisibilityKeyFrames(covisibleNum);
+   cv::Mat rotation = mpCurrentKeyFrame->GetRotation();
+   cv::Mat translation = mpCurrentKeyFrame->GetTranslation();
+
+   Eigen::Matrix3d r2 = Converter::toMatrix3d(rotation);
+   Eigen::Quaterniond q2(r2);
+
+   fs1 << mpCurrentKeyFrame->mnFrameId << ",";
+   for (int k = 0; k < cos.size(); k++)
+   {
+    fs1 << cos[k]->mnFrameId << ",";
+   }
+
+   fs1 << "|" << 
+   q2.w() <<","<< q2.x() <<","<< q2.y() <<","<< q2.z() <<","
+   << translation.at<float>(0) <<","
+   << translation.at<float>(1) <<","
+   << translation.at<float>(2) 
+   << std::endl;
+  }
+
+\end{lstlisting}
+
+对任意一帧图像，在SLAM处理后只处理并保存关联关键帧大于4帧的图像，依次获取与该帧匹配度最高的4帧和该帧所对应的位
+姿（R，t）结果如表~\ref{tab:SLAM_result}所示。
+
+\begin{table}[h]
+  \centering
+  \caption{SLAM处理结果}
+  \label{tab:SLAM_result}
+  \begin{tabular}{C{1.2cm}C{4.0cm}C{8.6cm}}
+  \toprule
+  \textbf{当前帧} & \textbf{匹配帧集合} &\textbf{位姿}  \\
+  \midrule
+  4&[5 3 2 1 ]&[R:0.989 -0.008 -0.137 0.053 t:-0.00 0.017 -0.033]\\
+  3&[4 5 2 1 ]&[R:0.989 -0.031 -0.163 0.056 t:-0.001 0.015 -0.030]\\
+  6&[5 7 4 8 ]&[R:0.987 -0.019 -0.131 0.090 t:-0.018 0.016 -0.064]\\
+  2&[3 4 5 1 ]&[R:0.981 -0.018 -0.184 0.057 t:0.000 0.015 -0.025]\\
+  8&[9 7 10 6 ]&[R:0.989 -0.039 -0.111 0.079 t:-0.034 0.014 -0.104]\\
+  $\dots$   &   $\dots$ &   $\dots$\\
+  $\dots$   &   $\dots$ &   $\dots$\\
+  $\dots$   &   $\dots$ &   $\dots$\\
+  $\dots$   &   $\dots$ &   $\dots$\\
+  145&[147 146 148 149 ]&[R:0.978 -0.118 -0.148 0.083 t:0.026 0.030 0.117]\\
+  149&[148 147 146 145 ]&[R:0.983 -0.109 -0.114 0.083 t:0.0123 0.020 0.033]\\
+  146&[147 148 145 149 ]&[R:0.972 -0.148 -0.168 0.067 t:0.017 0.0334 0.099]\\
+  151&[4 5 152 3 ]&[R:0.989 -0.096 -0.099 0.047 t:0.001 0.010 -0.057]\\
+  154&[12 13 11 10 ]&[R:0.992 -0.080 -0.085 0.021 t:-0.030 0.004 -0.204]\\
+  \bottomrule
+  \end{tabular}
+\end{table}
+
+各个匹配模式之间的耗时情况和匹配准确度如表~\ref{tab:match_compare}所示。
+\begin{table}[h]
+  \centering
+  \caption{各匹配模式耗时与精度情况对比表}
+  \label{tab:match_compare}
+  \begin{tabular}{C{3.6cm}C{2.4cm}L{2.4cm}L{2.4cm}C{3.6cm}}
+  \toprule
+  \textbf{匹配模式} & \textbf{耗时（/s）} &\textbf{匹配精度}  \\
+  \midrule
+  完全匹配  &504& 精度较高\\
+  序列匹配  &94&精度较高\\
+  传递匹配  &7 &精度较差\\
+  自定义匹配  &实时得到结果 &精度高\\
+  \bottomrule
+  \end{tabular}
+\end{table}
+
+
+
+\subsection{点云精度测试}
+在面对部分重复度高，表面问题贫瘠的场景中，三维重建往往难以生成有效的点云，按照第节提出的方法可以以SLAM生成的keyFrame Database
+作为先验知识来改善三维重建的结果。本实验考虑到地下车库场景重复度高，且存在反光现象，选择了地下车库作为实验场景，按照环形有闭环的
+路径采集了一系列图像，部分图像如~\ref{test_3D_garage}所示。
+如图~\ref{fig:test_3D_garage}所示
+\begin{figure}[H] % use float package if you want it here
+  \centering
+  \includegraphics[height=6cm,width=9.7cm]{test_3D_garage.png}
+  \caption{地下车库环形图像}
+  \label{fig:test_3D_garage}
+  \end{figure}
+对于普通三维重建方法而言，地下车库场景重建场景点云难度较大，因为场景中的场景重复度高，匹配精度较低，且反光场景的加入又会导致相机
+的位姿估计出现偏差，三维重建无法生成有效的点云结果，如图~\ref{fig:test_3D_badresult}所示。因此需要结合SLAM的结果来作为三维
+重建的先验知识，可以重建出较好的结果，结果如图~\ref{fig:test_3D_goodresult}所示。
+  \begin{figure}[h]
+  \centering
+    \subcaptionbox{结合SLAM三维重建}{\label{fig:test_3D_goodresult}
+    \includegraphics[height=6cm,width=9.7cm]{test_3D_goodresult.png}}
+  \vskip0.5cm
+    \subcaptionbox{直接三维重建}{\label{fig:test_3D_badresult}
+    \includegraphics[height=6cm,width=9.7cm]{test_3D_badresult.png}}
+  \caption{地下车库三维重建对比图}\label{fig:test_3D}
+\end{figure}
+
 \section{体积测算系统测试}
 \label{sec:5.4}
 在第四章，本文提出了一种基于纯视觉方法来测算场景中物体体积的方法，基于对实验场景进行的三维重建结果，整个实验步骤主要包括以下
@@ -195,7 +307,7 @@
 
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=9cm]{getVolume_inputCamera_1.png}
+  \includegraphics[height=6cm]{getVolume_inputCamera_1.png}
   \caption{三维重建输入视频序列图}
   \label{fig:getVolume_inputCamera}
   \end{figure}
@@ -295,41 +407,53 @@ K = 10.61。
 9. 将单个堆体分别设计成2个堆体和3个堆体的情况，重复步骤2$~$8，计算不同场景对应的体积。\\
 10 根据结果定量分析上述视觉算法测量堆体的准确性和稳定性。
 
-结果如表~\ref{tab:volume_test}所示。
-\begin{table}[h]
+结果如表~\ref{tab:volume_test_1}$\textasciitilde$~\ref{tab:volume_test_3}所示。
+\begin{table}[htb]
   \centering
-  \caption{堆体体积估计实验结果表}
-  \label{tab:volume_test}
-  \resizebox{\textwidth}{!}{
-      \Rotatebox{90}{
-  \begin{tabular}{@{}lccc@{}}
+  \caption{体积测量结果-\uppercase\expandafter{\romannumeral1}}
+  \label{tab:volume_test_1}
+  \begin{tabular}{C{2.4cm}C{2.0cm}C{8.0cm}C{2cm}}
   \toprule
-  \textbf{序号} & \textbf{1} & \textbf{2} & \textbf{3} \\
+  \textbf{实验批次} & \textbf{图像集数量} & \textbf{堆体场景预览} & \textbf{图像分辨率} \\
   \midrule
-  图像集数量 &	186&	202&	197\\
-  图像分辨率 &	960*455&	960*455&	960*45\\
-  场景预览   
-  & \includegraphics[width=7.5cm, height=5cm]{getVolume_3dconstr_1.png}
-  & \includegraphics[width=7.5cm, height=5cm]{getVolume_3dconstr_1.png}
-  & \includegraphics[width=7.5cm, height=5cm]{getVolume_3dconstr_1.png}    \\
-  稀疏点云    
-  & \includegraphics[width=7.5cm, height=5cm]{getVolume_3dconstr_1.png}
-  & \includegraphics[width=7.5cm, height=5cm]{getVolume_3dconstr_1.png}
-  & \includegraphics[width=7.5cm, height=5cm]{getVolume_3dconstr_1.png}    \\
-  尺度$K$&	2.4&	3.9&	4.6\\
-  平面方程$\pi$& $2x+3y=0$&2x+3y=0&2x+3y=0\\
-  稠密点云    
-  & \includegraphics[width=7.5cm, height=5cm]{getVolume_3dconstr_1.png}
-  & \includegraphics[width=7.5cm, height=5cm]{getVolume_3dconstr_1.png}
-  & \includegraphics[width=7.5cm, height=5cm]{getVolume_3dconstr_1.png}    \\
-  计算耗时\\(s)&	634&	585&	565\\
-  计算结果\\($cm^3$)&	13149&	12879&	12830\\
-  误差&	1.1$\%$&	0.9$\%$&	1.3$\%$\\
+  1 & 186   & \includegraphics[width=7.5cm, height=5cm]{test_1.png} & 960*455 \\
+  2 & 201   & \includegraphics[width=7.5cm, height=5cm]{test_2.png} & 960*455\\
+  3 & 215   & \includegraphics[width=7.5cm, height=5cm]{test_3.png} & 960*455\\
   \bottomrule
   \end{tabular}
-      }
-  }
 \end{table}
+
+\begin{table}[htb]
+  \centering
+  \caption{体积测量结果-\uppercase\expandafter{\romannumeral2}}
+  \label{tab:volume_test_2}
+  \begin{tabular}{C{8cm}C{2.0cm}C{1.2cm}C{3.6cm}}
+  \toprule
+  \textbf{稀疏点云} & \textbf{点集个数} & \textbf{尺度K} & \textbf{误差}\\
+  \midrule
+  \includegraphics[width=7.5cm, height=5cm]{test_1_sparse.png}  &110149&1.945&-0.0259x-0.0331y-0.0873z+1=0\\
+  \includegraphics[width=7.5cm, height=5cm]{test_2_sparse.png}  & 86403&8.143& 0.0068x-0.0299y-0.0620z+1=0\\
+  \includegraphics[width=7.5cm, height=5cm]{test_3_sparse.png}  & 83196&3.522& 0.0119x-0.0254y-0.0683z+1=0\\
+  \bottomrule
+  \end{tabular}
+\end{table}
+
+
+\begin{table}[htb]
+  \centering
+  \caption{体积测量结果-\uppercase\expandafter{\romannumeral3}}
+  \label{tab:volume_test_3}
+  \begin{tabular}{C{8cm}C{2.4cm}C{2.4cm}C{2.0cm}}
+  \toprule
+  \textbf{稠密点云} & \textbf{计算耗时（s）} & \textbf{堆体体积($cm^3$)} & \textbf{测量精度}\\
+  \midrule
+  \includegraphics[width=7.5cm, height=5cm]{test_1_dense.png}  & 712 & 10340  &   1.1$\%$\\
+  \includegraphics[width=7.5cm, height=5cm]{test_2_dense.png}  & 675 & 99032  &   0.9$\%$\\
+  \includegraphics[width=7.5cm, height=5cm]{test_3_dense.png}  & 663 & 10552  &   1.3$\%$\\
+  \bottomrule
+  \end{tabular}
+\end{table}
+
 
 \section{本章小结}
 本章分模块测试了无人机在非GPS场景下依靠纯视觉进行定位的效果与精度，以及改进后的三维重建的效果和基于纯视觉的堆体体积测量算法的准确度和稳定性。
