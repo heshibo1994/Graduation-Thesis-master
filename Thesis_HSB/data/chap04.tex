@@ -137,13 +137,7 @@ Aruco二维码的布置都会有下侧两个角点直接落在水平面上，因
 取初始化成功后的前两帧作为单位尺度，后续的所有关键帧都以此为参考确定尺度。这样的做法可以获取到地图中所有描述的绝
 对尺度，但无法计算出实际尺度，本文提出两种估计尺度大小的方法，这两种方法都主要是通过在场景中引入已知尺度的二维码
 来确定所构点云地图的真实尺度，主要针对同一场景，通过计算两种SLAM的相机位姿或者两种SLAM中地图点坐标来确定相对尺度
-和绝对尺度之间的比例，从而确定绝对尺度。流程图如图~\ref{fig:getVolume_getK}所示。
-\begin{figure}[H] % use float package if you want it here
-  \centering
-  \includegraphics[height=12cm]{getVolume_getK.png}
-  \caption{估计尺度流程图}
-  \label{fig:getVolume_getK}
-\end{figure}
+和绝对尺度之间的比例，从而确定绝对尺度。
 \subsection{位姿法解算尺度}
 首先，获取绝对尺度的数据，由图~\ref{fig:getVolume_Aruco_detect}所示同时可以得到相机在某一个确定的Aruco下的位姿，因为二维
 码自带确定的边长信息，因此可以得到带有绝对尺度的相机位姿（$T_x$,$T_y$,$T_z$）。在实际的工程中需要注意，必须选择不同状态的
@@ -231,13 +225,6 @@ Aruco二维码的布置都会有下侧两个角点直接落在水平面上，因
 2.	通过空间变换，将三维空间点转化为水平面上的点2D点集;\\
 3.	对所有点集求Delauncy三角形，计算每个三角形对应的水平高度，得到三棱柱体积；\\
 4.	剔除异常三棱柱，将所有有效的三棱柱积分求和得到总体积。
-流程图如图~\ref{fig:getVolume_pipeline}所示。
-\begin{figure}[H] % use float package if you want it here
-  \centering
-  \includegraphics[height=12cm]{getVolume_pipeline.png}
-  \caption{解算体积流程图}
-  \label{fig:getVolume_pipeline}
-\end{figure}
 \subsection{有效3D点集获取}
 \label{sec:4.4.1}
 通过第~\ref{cha:chap3}章的方法，可以对场景获取到三维稀疏点云和稠密点云，在生成点云的过程中会把部分非感兴趣区域的内容和一些
