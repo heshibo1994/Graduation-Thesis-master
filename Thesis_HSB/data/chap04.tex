@@ -19,7 +19,7 @@
   \end{figure}
 \section{堆体水平面方程解析方法}
 \label{sec:4.2}
-\subsection{D/3D点坐标检测}
+\subsection{2D/3D点坐标检测}
 \label{sec:4.2.1}
 对于水平面的求解，其基本思路为求解落在堆体水平面上二维码的角点所在的坐标平面，或者求解已知角点和堆体水平面的实际空间位置关系，通过角点求解堆体实际水平面方程，二维码如图~\ref{fig:2VSLAM_Marker_detection}所示，将其作为媒介来估计平面方程。
 
@@ -27,7 +27,7 @@
 \begin{figure}[H] % use float package if you want it here
   \centering
   \includegraphics[height=8cm]{4GetV_Marker_detection.png}
-  \caption{Aruco二维码检测示意图}
+  \caption{二维码检测示意图}
   \label{fig:4GetV_Marker_detection}
 \end{figure}
 其次再检测3D点，通过上述步骤，可以获得连续视频帧中每一帧的二维码角点的坐标值，同样的，可以直接将这些包含二维码的视频帧序列作为三维重建的输入以获取场景的点云，考虑到二维码角点被作为特征点时极易被检出，因此只需要通过稀疏点云，即可获取角点在二维图像中的坐标和三维重建点云中的三维坐标之间的对应关系。
@@ -104,7 +104,6 @@
 对于任意平面方程，都可以利用以下方程通过确定4个参数的方式来确定唯一解析解。
 \begin{equation}Ax+By+Cz+D= 0\label{equ:plane}\end{equation}
 在迭代的过程中，同时需要确定每个带估计参数的初始值，最终可以得到方程的四个参数A,B,C,D。
-
 \section{堆体尺度估计方法}
 \label{sec:4.3}
 由单目视觉重建出来的点云地图都存在没有确定尺度的问题，地图中的特征点坐标和相机的位姿都是相对尺度，即最常见的采取初始化成功后的前两帧作为单位尺度，后续的所有关键帧都以此为参考确定尺度。这样的做法可以获取到地图中所有描述的绝对尺度，但无法计算出实际尺度，本文提出两种结合二维码估计尺度大小的方法，通过在场景中引入已知尺度的二维码来确定所构点云地图的真实尺度，主要针对同一场景，计算两种SLAM的相机位姿或者两种SLAM中地图点坐标来确定相对尺度和绝对尺度之间的比例，从而确定绝对尺度。
@@ -172,53 +171,61 @@
 \subsection{空间坐标点估计尺度}
 对于尺度的估计，可以通过场景中已知点之间的距离通过投影获得点云之中点的实际坐标，但是空间中的已知点难以确定，而且也不易保持固定不变，符合以上规则的点的数量较少。因此考虑到场景中二维码标记的角点为研究对象，可以通过SLAM求得每一个二维码在图像中的位置以及四个角点的位置，因为角点极易识别，且任意两个角点之间的实际空间距离都能够简易测量得到。
 
-通过第~\ref{cha:chap3}章三维重建的流程，可以获取到每一个点在二维图像中和三维空间点之间的对应关系，如图所示~\ref{fig:4GetV_sizebyPoint}表示的是同一个点在二维和三维之间的对应。因为图像中的任意两个二维码角点之间的距离都是已知的，那么也可以得到三维坐标中任意两个角点之间的绝对尺度，将这一尺度因子应用到整个地图中进行缩放，即可获得一个带有真实尺度的地图。
-\begin{figure}[t] % use float package if you want it here
+通过第~\ref{cha:chap3}章三维重建的流程，可以获取到每一个点在二维图像中和三维空间点之间的对应关系，如图~\ref{fig:4GetV_sizebyPoint}所示表示的是同一个点在二维和三维之间的对应。因为图像中的任意两个二维码角点之间的距离都是已知的，那么也可以得到三维坐标中任意两个角点之间的绝对尺度，将这一尺度因子应用到整个地图中进行缩放，即可获得一个带有真实尺度的地图。
+\begin{figure}[h] % use float package if you want it here
   \centering
-  \includegraphics[height=8cm]{4GetV_sizebyPoint.png}
+  \includegraphics[height=6cm]{4GetV_sizebyPoint.png}
   \caption{根据空间点估计尺度流程图}
   \label{fig:4GetV_sizebyPoint}
 \end{figure}
-\section{纯视觉体积测量方法}
+\section{堆体体积测量方法研究}
 \label{sec:4.4}
-根据以上两节可以获取到三维重建后点云的水平面和比例尺度，再此基础上计算出物体的实际体积，本文提出一种计算点云实际体积的方法，
-具体流程如下：\\
-1.	将所有点云结果投影在水平面上，根据场景的实际空间约束和过滤方法提出得到点云中的有效3D点集；\\
-2.	通过空间变换，将三维空间点转化为水平面上的点2D点集;\\
-3.	对所有点集求Delauncy三角形，计算每个三角形对应的水平高度，得到三棱柱体积；\\
-4.	剔除异常三棱柱，将所有有效的三棱柱积分求和得到总体积。
+根据以上两节可以获取三维重建后堆体点云的水平面方程和比例尺度，在此基础上可以进一步计算出堆体的实际体积，本文提出一种计算点云实际体积的方法，具体流程如下：
+
+1. 将所有堆体点云中的3D点投影在水平面上，根据场景的实际空间约束和过滤方法提纯出有效3D点集；
+
+2. 通过空间变换，将三维空间点转化为水平面上的点2D点集；
+
+3. 对所有2D点集求Delauncy三角形，计算每个三角形对应的水平高度，得到三棱柱体积；
+
+4. 剔除异常三棱柱，将所有有效的三棱柱积分求和得到总体积。
+
+流程图如图~\ref{fig:4GetV_volume}所示。
+\begin{figure}[h] % use float package if you want it here
+  \centering
+  \includegraphics[height=10cm]{4GetV_volume.png}
+  \caption{纯视觉测量体积流程图}
+  \label{fig:4GetV_volume}
+\end{figure}
 \subsection{有效3D点集获取}
 \label{sec:4.4.1}
-通过第~\ref{cha:chap3}章的方法，可以对场景获取到三维稀疏点云和稠密点云，在生成点云的过程中会把部分非感兴趣区域的内容和一些
-离散的误差噪音点添加至点云结果中。针对这两种情况，本文分别提出以下对应的解决方法：\\
-1.	针对非感兴趣区域，本文通过三维空间平面方程对非感兴趣区域直接进行切割剔除；\\
-2.	针对随机误差噪音点，本文通过离群点检测算法进行剔除。
+通过第~\ref{cha:chap3}章的方法，可以对堆体场景获取三维稀疏点云和稠密点云，在生成点云的过程中会把部分非感兴趣区域的内容和一些离散的误差噪音点添加至点云结果中。针对这两种情况，本文分别提出以下对应的解决方法：
 
-对于方案1，在三维重建后的点云中，只需要收集感兴趣区域内的3D点集，如图~\ref{fig:getVolume_interesting}所示，只有红色框图
-内区域是感兴趣区域，可以通过上一节求出的水平面方程和二维码的底边点坐标共同约束求出空间切面方程对场景进行切割。
+1. 针对非感兴趣区域，本文通过三维空间平面方程对非感兴趣区域直接进行切割剔除；
+
+2. 针对随机误差噪音点，本文通过离群点检测算法进行剔除。
+
+对于方案1，对于重建后的三维点云，只需要收集感兴趣区域内的3D点集，如图~\ref{fig:4GetV_interesting}所示，只有红色框图内区域是体积测量的感兴趣区域，通过上一节求出的水平面方程和二维码的底边点坐标共同约束求出空间切面方程对场景进行切割。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=5cm]{getVolume_interesting.png}
+  \includegraphics[height=4.5cm]{4GetV_interesting.png}
   \caption{三维重建感兴趣区域示意图}
-  \label{fig:getVolume_interesting}
+  \label{fig:4GetV_interesting}
 \end{figure}
-对于方案2，本文采用统计滤波器即为对每个点的邻域进行一个统计分析，并修剪掉一些不符合标准的点，具体方法为在输入数据中对点到临
-近点的距离分布的计算，对每一个点，计算它到所有临近点的平均距离（假设得到的结果是一个高斯分布，其形状是由均值和标准差决定），
-那么平均距离在标准范围之外的点，可以被定义为离群点并从数据中去除。采用统计滤波对点云中的离散点进行滤波对比如
-图~\ref{fig:getVolume_3dconstr_filter}所示。
+对于方案2，本文采用统计滤波器即为对每个点的邻域进行一个统计分析，并修剪掉一些不符合标准的点，具体方法为在输入数据中对点到临近点的距离分布的计算，对每一个点，计算它到所有临近点的平均距离（假设得到的结果是一个高斯分布，其形状是由均值和标准差决定），那么平均距离在标准范围之外的点，可以被定义为离群点并从数据中去除。采用统计滤波对点云中的离散点进行滤波对比如图~\ref{fig:4GetV_3dconstr_filter}所示。
 \begin{figure}[H]
   \centering
-    \subcaptionbox{对点云统计滤波前}{\label{fig:chap1:getVolume_3dconstr_noise}
-    \includegraphics[width=9cm]{getVolume_3dconstr_noise.png}}
+    \subcaptionbox{对点云统计滤波前}{\label{fig:4GetV_3dconstr_noise}
+    \includegraphics[width=8cm]{4GetV_3dconstr_noise.png}}
   \vskip0.5cm
-    \subcaptionbox{对点云统计滤波后}{\label{fig:chap1:getVolume_3dconstr_nonoise}
-    \includegraphics[width=9cm]{getVolume_3dconstr_nonoise.png}}
-  \caption{点云统计滤波前后效果对比示意图}\label{fig:getVolume_3dconstr_filter}
+    \subcaptionbox{对点云统计滤波后}{\label{fig:chap1:4GetV_3dconstr_nonoise}
+ \includegraphics[width=8cm]{4GetV_3dconstr_nonoise.png}}
+  \caption{点云统计滤波前后效果对比示意图}\label{fig:4GetV_3dconstr_noise}
 \end{figure}
+通过以上步骤，可以求出有关堆体的有效3D点集，接下来需要将所有三维点云投影至二维平面上获取2D点集，简略步骤如下：
+1. 通过~\ref{sec:4.2}节获取点云水平面和参考坐标系中的xy平面方程的法向量分别为U(A,B,C)和V(0,0,1);
 
-通过上一步骤，可以求出有效的3D点集，接下来需要将所有三维点云投影至二维平面上获取2D点集，简略步骤如下：\\
-1.	通过~\ref{sec:4.2}节获取点云水平面和参考坐标系中的xy平面方程的法向量分别为U(A,B,C)和V(0,0,1);\\
-2.	将所有的3D点集O($x_o$,$y_o$,$z_o$)根据以下公式投影水平面上，获取新的3D点集P($x_p$,$y_p$,$z_p$)；
+2. 将所有的3D点集O($x_o$,$y_o$,$z_o$)根据以下公式投影水平面上，获取新的3D点集P($x_p$,$y_p$,$z_p$)；
 \begin{equation}
   \begin{split}
   x_p=\frac{(B^2+C^2)x_o-A(By_o+Cz_o+D)}{A^2+B^2+C^2}\\
@@ -231,65 +238,61 @@
 \begin{equation}
 d\;=\frac{\left|Ax_0+By_0+Cz_0+D\right|}{\sqrt{A^2+B^2+C^2}}
 \end{equation}
-3.	计算旋转角度：
+
+3. 计算旋转角度：
 \begin{equation}
-\theta=arc\cos(\frac{P\cdot Q}{\left|P\right|\left|Q\right|})
+\theta=arc\cos(\frac{U\cdot V}{\left|U\right|\left|V\right|})
 \end{equation}
-4.	计算旋转轴：在计算旋转角时可知，旋转角所在的平面为有P和Q所构成的平面，那么旋转轴必垂直该平面。
-假定旋转前向量为a($a_1$, $a_2$, $a_3$)， 旋转后向量为b（$b_1$, $b_2$, $b_3$)。由叉乘定义得旋转轴c($c_1$, $c_2$, $c_3$)为
+
+4. 计算旋转轴：在计算旋转角时可知，旋转角所在的平面为有P和Q所构成的平面，那么旋转轴必垂直该平面。
+假定旋转前向量为a($a_1$, $a_2$, $a_3$)， 旋转后向量为b（$b_1$, $b_2$, $b_3$)。由叉乘定义得旋转轴k($k_1$, $k_2$, $k_3$)为
 \begin{equation}
 \begin{pmatrix}c_1\\c_2\\c_3\end{pmatrix}=\begin{pmatrix}a_2b_3-a_3b_2\\a_3b_1-a_1b_3\\a_1b_2-a_2b_1\end{pmatrix}
 \end{equation}
-5.	根据罗德里格旋转公式将旋转角，旋转轴的表达转化为旋转矩阵R；\\
-6.	将3D点集P($x_p$,$y_p$,$z_p$)右乘上述旋转矩阵R可以得到一系列在同一平面上（所有转变后的点z值都相同）的3D点集，提取所有
-3D点的x,y值构成2D点集p($x$,$y$)。
+
+5. 根据罗德里格旋转公式将旋转角，旋转轴的表达转化为旋转矩阵R
+\begin{equation}R=\cos \theta I+(1-\cos \theta) k k^{\top}+\sin \theta k^{\wedge}\end{equation}
+
+6. 将3D点集P($x_p$,$y_p$,$z_p$)右乘上述旋转矩阵R可以得到一系列在同一平面上（所有转变后的点z值都相同）的3D点集，提取所有3D点的x,y值构成2D点集p($x$,$y$)。
 \subsection{Delaunay三角网}
 \label{sec:4.4.3}
-通过~\ref{sec:4.2}小结，可以得到在由在同一平面上的3D点集转化成的2D点集和每一个2D点集对应的距离值d。在本节中将对2D点集进行
-三角剖分，获得Dealunay三角网，Delaunay三角网是一系列相连的但不重叠的三角形的集合, 而且这些三角形的外接圆不包含这个面域的其
-他任何点，如图~\ref{fig:getVolume_Delaunay}所示。
+通过~\ref{sec:4.2}小结，可以得到在由在同一平面上的3D点集转化成的2D点集和每一个2D点集对应的距离值d。在本节中将对2D点集进行三角剖分，获得Dealunay三角网，Delaunay三角网是一系列相连的但不重叠的三角形的集合, 而且这些三角形的外接圆不包含这个面域的其他任何点，如图~\ref{fig:4GetV_Delaunay}所示。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=6cm]{getVolume_Delaunay.png}
+  \includegraphics[height=6cm]{4GetV_Delaunay.png}
   \caption{Delaunay三角网示意图}
-  \label{fig:getVolume_Delaunay}
+  \label{fig:4GetV_Delaunay}
 \end{figure}
-获取Delaunay三角网格的一般步骤为：\\
-1.	构造一个超级三角形，包含所有散点，放入三角形链表;\\
-2.	将点集中的散点依次插入，在三角形链表中找出其外接圆包含插入点的三角形（称为该点的影响三角形），删除影响三角形的公共边，
-将插入点同影响三角形的全部顶点连接起来，从而完成一个点在Delaunay三角形链表中的插入;\\
-3.	根据优化准则对局部新形成的三角形进行优化。将形成的三角形放入Delaunay三角形链表;\\
-4.	循环执行上述第2步，直到所有散点插入完毕。\\
-由于Delaunay剖分具备具备最接近（以最近的三点形成三角形，且各线段(三角形的边)皆不相交）和区域性（新增、删除、移动某一个顶点
-时只会影响临近的三角形）的特性,可以对点集所构成的平面进行拟合。通过以上流程可以获得三角形的集合以及三角形中每个顶点对应的距
-离，取三个顶点距离的平均值作为三棱柱的高，每个三角形的面积按照公式~\ref{equ:tri_s}计算，即可获得所有三棱柱的体积。
-\begin{equation}
-S_\bigtriangleup=\frac12\times\left(x_1y_2-x_1y_3+x_2y_3-x_2y_1+x_3y_1-x_2y_2\right)\label{equ:tri_s}
-\end{equation}
+获取Delaunay三角网格的一般步骤为： 
+
+1. 构造一个超级三角形，包含所有散点，放入三角形链表;
+
+2. 将点集中的散点依次插入，在三角形链表中找出其外接圆包含插入点的三角形（称为该点的影响三角形），删除影响三角形的公共边，将插入点同影响三角形的全部顶点连接起来，从而完成一个点在Delaunay三角形链表中的插入;
+
+3. 根据优化准则对局部新形成的三角形进行优化。将形成的三角形放入Delaunay三角形链表;
+
+4. 循环执行上述第2步，直到所有散点插入完毕。\\
+由于Delaunay剖分具备最接近性和区域性的特性,可以对点集所构成的平面进行拟合。通过以上流程可以获得三角形集合以及三角形中每个顶点对应的距离，取三个顶点距离的平均值作为三棱柱的高，即可获得所有三棱柱的体积。
 \subsection{积分三棱柱}
 \label{sec:4.4.4}
-通过以上步骤，可以将三维重建后点云体积的求解转化成对多个三棱柱积分的求解，因为所有三棱柱的体积值都分布在某一个区间内（并不完
-全服从正太分布），对于部分偏差较大的三棱柱体积值应该通过算法进行剔除。本文采用箱形图的方法来处理这一问题，箱形图不受异常值的
-影响，能够准确稳定地描绘出数据的离散分布情况，同时也利于数据的清洗。
-\begin{figure}[H] % use float package if you want it here
+通过以上步骤，可以将三维重建后点云体积的求解转化成对多个三棱柱积分的求解，因为所有三棱柱的体积值都分布在某一个区间内（并不完全服从正太分布），对于部分偏差较大的三棱柱体积值应该通过算法进行剔除。本文采用箱形图的方法来处理这一问题，箱形图不受异常值的影响，能够准确稳定地描绘出数据的离散分布情况，同时也利于数据的清洗，箱形图如图~\ref{fig:4GetV_boxplot}所示。
+\begin{figure}[t] % use float package if you want it here
   \centering
-  \includegraphics[height=6cm]{getVolume_boxplot.png}
-  \caption{Delaunay三角网示意图}
-  \label{fig:getVolume_boxplot}
+  \includegraphics[height=6cm]{4GetV_boxplot.png}
+  \caption{箱形图示意图}
+  \label{fig:4GetV_boxplot}
 \end{figure}
-箱形图如图~\ref{fig:getVolume_boxplot}所示，主要需要求解出数据中的5个特征数据值，包
-括下四分位数Q1，上四分位数Q3，四分位距IQR=Q3-Q1，以及上限Q3+1.5IQR和下限Q1-1.5IQR，对于上下限之外的内容需要剔除，最终结
-合\label{sec:4.3}所估算出的尺度，以及所有有效三棱柱的体积按照公式~\ref{equ:get_volume}即可估计出物体中感兴趣区域的实际
-体积值。
+主要需要求解出数据中的5个特征数据值，包括下四分位数Q1，上四分位数Q3，四分位距IQR=Q3-Q1，以及上限Q3+1.5IQR和下限Q1-1.5IQR，对于上下限之外的内容需要剔除，最终结合\label{sec:4.3}估算出的尺度，以及所有有效三棱柱的体积按照公式~\ref{equ:get_volume}即可估计出物体中感兴趣区域的实际体积值。
 \begin{equation}
   V\;=K^3\;\ast\sum_i\frac13\ast S_\bigtriangleup\times\sum_{j=1}^3d_j\label{equ:get_volume}
 \end{equation}
 \section{本章小结}
-本章的主要目的是通过纯视觉的方式对点云体积进行测量，以获取到堆体的实际体积。
+本章提出了一种面向堆体场景的体积测量方法，主要包括水平面方程的求解，尺度值的估计以及计算3D点云体积等流程，该方法完全基于纯视觉方式实现，在获取到堆体三维点云后，可以自动化估计出堆体的整体体积。
 
-本章提出了通过纯视觉方法进行堆体体积测量的一般步骤,通过位姿比例或空间三维点坐标比例估计出堆体点云和堆体实际空间点之间的尺度关系;通过2D角点获取对应3D映射点，通过非线性优化求解水平面方程参数的最优值；最后再结合水平面投影求解Delaunay三角形，积分三棱柱以估计出堆体点云的体积。
+本章重点分析了堆体体积测量的可行性和数学描述过程，包含通过位姿法或者空间点坐标值法，利用非线性优化估计出堆体场景实际尺度和堆体点云相对尺度之间的比例关系;通过2D角点获取对应3D映射点，将水平面方程求解转化求解点集共面方程的问题；最后结合尺度估计值和水平面投影以及空间坐标变换求解Delaunay三角形，积分三棱柱以估计出堆体点云的实际体积。
 
-本章所提出方法完全基于视觉方案，整体流程可自动化完成，且可以在相似场景中复用。
+本章以无人机的自主定位和飞行和高精度的三维重建为基础，提出了面对堆体场景的纯视觉体积测量技术，完整流程可以自动化完成，复用于相似场景。
+
 
 
 

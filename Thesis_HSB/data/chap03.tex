@@ -34,7 +34,7 @@
 \begin{figure}[H] % use float package if you want it here
     \centering
     \includegraphics[width=12cm]{3Dconstr_pipiline.png}
-    \caption{三维重建一般步骤流程图}
+    \caption{三维重建具体实现步骤图}
     \label{fig:3Dconstr_pipiline}
     \end{figure}
 三维重建主要分为多个步骤，目前很多开源的系统都可以完成其中的部分环节，对于完整的三维重建流程还需要多个系统相互连接实现，表~\ref{tab:3D_compare}是当前三维重建系统的简要对比，其中绿色框图代表该重建系统包括该流程，灰色则不包括。
@@ -204,7 +204,7 @@ S{(A,B)}_{SSD}=\sum_{i,j}(A(i,j)-B{(i,j))}^2
 \begin{figure}[H] % use float package if you want it here
   \centering
   \includegraphics[width=12cm]{3dconstr_sparse.png}
-  \caption{误差投影示意图}
+  \caption{堆体稀疏重建示意图}
   \label{fig:3dconstr_sparse}
 \end{figure}
 \subsection{当前三维重建存在的问题}

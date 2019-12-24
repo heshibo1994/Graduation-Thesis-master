@@ -2,56 +2,49 @@
 \label{cha:chap5}
 \section{引言}
 \label{sec:5.1}
-做实验做实验做实验
+本章将对以上章节提出的方法通过实验进行验证，主要包括无人机的自主定位和飞行精度测试，三维重建生成点云的实效性以及精度测试和面向堆体的体积精度测试。本章将对这三部分内容进行分模块处理，包括实验设计，方法测试，数据分析等，对方法表现进行定性分析，对实验数据进行定量比较。
+
+对于无人机的自主定位和飞行精度测试，本章将对实际场景展开无人机的定位和飞行，结合第2章所提方法，利用场景中的二维码进行有尺度且基于真实世界坐标系下自主定位，并基于定位结果进行无人机的循迹飞行。在无人机飞行的过程中，实时记录下无人机的飞行状态，和二维码地图的数据，对精度进行定量分析。
+
+对于三维重建生成点云的实效性以及精度测试，本章将对比第3章所提出的稀疏点云重建所采用的图像匹配模式，定性比较各匹配模式之间的实效性，并结合SLAM将运行后的keyFrame DataBase以及先验位姿提供给离线三维重建系统，定性比较三维重建后点云的精度差异。
+
+对于面向堆体的体积测量精度测试，本文选用沙堆作为研究对象，利用其易获取真值且能够任意改变形状的特点，代替其他堆体进行试验。结合第4章的方法，测试堆体三维点云和实际堆体之间的尺度估计值，堆体点云的水平面方程，以及利用纯视觉方法测试堆体体积的稳定性和精确度。
 \section{无人机视觉定位系统测试}
 \label{sec:5.2}
-\subsection{视觉定位系统实验步骤设计}
+\subsection{无人机视觉定位系统实验步骤设计}
 \label{sec:5.2.1}
-在第二章，本文提出了一种结合二维码的SLAM视觉系统，利用该系统可以估计出带有真实尺度的相机位姿，以及能够得到真实世界坐标系下的
-相机位置。本次实验主要利用上述方法在复杂封闭，且无GPS信号的环境下，结合二维码视觉标签进行无人机定位，通过获得到的位置信息信
-息进行下一步的飞行控制。本次实验的准备过程主要分为三个步骤，布置场景，生成地图，无人机自主循迹。
+在第2章，本文提出了一种结合二维码的SLAM视觉定位系统，利用该系统可以估计出带有真实尺度的相机位姿，以及能够得到真实世界坐标系下的相机位姿。本次实验主要利用上述方法在不利用GPS信号的环境下，结合二维码视觉标签进行无人机定位，通过获得到的位置信息进行下一步的飞行控制。本次实验的准备过程主要分为三个步骤，布置场景，生成地图，无人机循迹飞行。
 
-首先是场景布置，选择在空旷场地中，布置二维码视觉标签，保证每个二维码的尺度大小完全一致，且二维码之间尽可能等间距布置，场景中的
-二维码ID完全独立不同，设计图和实际布置图分别如图~\ref{fig:scene_imagine}和图~\ref{fig:scene_reality}所示。在本次实验中，所原选择的二维码实际大小为0.73m，相邻二维码之间的距
-离为4m，整个实验区域面积为400$m^2$（20m*20m）。
+首先是场景布置，选择在空旷场地中，布置二维码视觉标签，保证每个二维码的尺度大小完全一致，且二维码之间尽可能等间距布置，场景中的二维码ID完全独立不同，设计图和实际布置图分别如图~\ref{fig:5Test_scene_imagine}和图~\ref{fig:5Test_scene_reality}所示。在本次实验中，所原选择的二维码实际大小为0.73m，相邻二维码之间的距离为4m，整个实验区域面积为400$m^2$（20m*20m）。
 \begin{figure}[H]
   \centering%
-  \subcaptionbox{实验场景设计示意图\label{fig:scene_imagine}}{%    
-    \includegraphics[height=6cm,width=6cm]{scene_imagine.png}}\hspace{4em}%
-  \subcaptionbox{实验场景真实布置图\label{fig:scene_reality}}{%    
-    \includegraphics[height=6cm,width=6cm]{scene_reality.png}}
+  \subcaptionbox{实验场景设计示意图\label{fig:5Test_scene_imagine}}{%    
+    \includegraphics[height=6cm,width=6cm]{5Test_scene_imagine.png}}\hspace{4em}%
+  \subcaptionbox{实验场景真实布置图\label{fig:5Test_scene_reality}}{%    
+    \includegraphics[height=6cm,width=6cm]{5Test_scene_reality.png}}
   \caption{实验场景示意图}
   \label{fig:scene}
 \end{figure}
 
-在布置好场景后，需要根据实际场景生成地图信息。当无人机首次在无先验地图的环境下飞行时，需要人工手动控制，完成无人机的飞行和地图
-生成工作，在无人机的手动飞行过程中，其飞行区域需要尽可能覆盖所有场景以确保生产完整的地图，根据实际场景生成的地图如图~\ref{fig:map_generator}
-所示，其中正方形框代表二维码，蓝色相机表示代表视觉定位产生的关键帧，点代表地图中的特征点。
-
+在布置好场景后，需要根据实际场景生成地图信息。当无人机首次在无先验地图的环境下飞行时，为了保证后续飞行精度，可以先飞行一次建立场景的先验地图，在无人机的飞行过程中，其飞行区域需要尽可能覆盖所有场景以确保生成完整的地图，根据实际场景生成的地图如图~\ref{fig:5Test_map_generator}所示，其中正方形框代表二维码，蓝色相机表示代表视觉定位产生的关键帧，点代表地图中的特征点。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=8cm]{map_generator.png}
+  \includegraphics[height=6cm]{5Test_map_generator.png}
   \caption{视觉算法生成地图}
-  \label{fig:map_generator}
+  \label{fig:5Test_map_generator}
 \end{figure}
-
-当获取到完整的地图信息地图后，可以让无人机按照认为规定的轨迹进行自动循迹飞行，首先设计如下图~\ref{fig:flight_route}所示的轨
-迹图，其中起始点为ID=0的二维码处，红色箭头代表无人机的飞行轨迹，对于无人机的飞控过程，按照设定循迹点的方案来实现，即在整个轨迹
-中给定多个循迹点坐标，使得无人机按照设定的坐标顺序进行飞行。
+当获取到完整的地图信息地图后，可以让无人机按照认为规定的轨迹进行自动循迹飞行，首先设计如下图~\ref{fig:5Test_flight_route}所示的轨迹图，起飞点为ID=0的二维码处，红色箭头代表无人机的飞行轨迹，对于无人机的飞控过程，按照设定循迹点的方案来实现，在整个轨迹中给定多个循迹点坐标，使得无人机按照设定的坐标顺序进行飞行即可。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=8cm]{flight_route.png}
+  \includegraphics[height=8cm]{5Test_flight_route.png}
   \caption{无人机自主飞行轨迹设计图}
-  \label{fig:flight_route}
+  \label{fig:5Test_flight_route}
 \end{figure}
 \subsection{视觉定位系统实验结果分析}
 \label{sec:5.2.2}
-按照上述实验流程让无人机进行自主飞行，可以直接获取到视觉算法生成的地图以及无人机在飞行的过程中生成的三维坐标，根据这些数据可以对
-视觉算法关于无人机自主定位的效果进行定量的分析，本节主要从生成地图的精度，无人机三维坐标的精度以及轨迹精度三个方面进行定量分析。
+按照上述实验流程让无人机进行自主飞行，可以直接获得视觉算法生成的地图以及无人机在飞行的过程中生成的三维坐标，根据这些数据可以对视觉算法关于无人机自主定位的效果进行定量的分析，本文主要从生成地图的精度，无人机三维坐标的精度以及轨迹精度三个方面进行定量分析。
 
-首先对于地图精度，根据图~\ref{fig:scene_reality}生成的地图，通过对地图的解析，可以获取每一个二维码的三维位置坐标，如
-表~\ref{tab:chap1:marker_pose}所示。
-
+首先对于地图精度，根据图~\ref{fig:5Test_scene_reality}生成的地图，通过对地图的解析，可以获取每一个二维码的三维位置坐标，如表~\ref{tab:chap1:marker_pose}所示。
 \begin{table}[h]
   \centering
   \caption{二维码标志位置实际测量值}
@@ -71,13 +64,13 @@
   \bottomrule
   \end{tabular}
 \end{table}
+针对地图的精度，可以提出以下两个判断指标：
 
-针对地图的精度，可以提出以下两个判断指标。\\
-1）任意两个二维码之间距离的测量值和理论值的误差比较；\\
-2）所有二维码是否在同一个坐标平面。
+1. 任意两个二维码之间距离的测量值和理论值的误差比较；
 
-针对指标1，计算得到表~\ref{tab:chap1:marker_map_error}，经过计算得到地图中二维码的误差精度为3.1$\%$。
+2. 所有二维码是否在同一个坐标平面。
 
+针对指标1，计算得到表~\ref{tab:chap1:marker_map_error}，经过计算得到地图中二维码的平均误差精度为3.1$\%$。
 \begin{table}[h]
     \centering
     \caption{二维码位置误差}
@@ -118,17 +111,14 @@
     \end{tabular}
 \end{table}
 
-针对指标2，绘制出每个二维码的在同一个坐标平面的误差情况，如图~\ref{fig:marker_map_error_Z}所示，平均误差为0.18m，
-可以认定所有二维码基本都在同一水平面内。
+针对指标2，绘制出每个二维码在同一个坐标平面的误差情况，如图~\ref{fig:5Test_marker_map_error_Z}所示，平均误差为0.18m，可以认定所有二维码基本都在同一水平面内。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=8cm]{marker_map_error_Z.png}
+  \includegraphics[height=8cm]{5Test_marker_map_error_Z.png}
   \caption{二维码Z方向数据}
-  \label{fig:marker_map_error_Z}
+  \label{fig:5Test_marker_map_error_Z}
 \end{figure}
-其次对于无人机三维坐标的精度，以无人机自带GPS测距仪器测定出的坐标为真值，和视觉算法计算出来的位置信息进行对比，选择无人机
-在0-800帧的数据，在X、Y、Z方向得到的结果分别如图~\ref{fig:chap2:pose_xyz}所示,其中蓝色连线为视觉算法检测出的坐标值，红色
-连线无人机GPS检测出的真实值。
+其次对于无人机三维坐标的精度，以无人机自带GPS测定出的坐标为真值，和视觉算法计算出来的位置信息进行对比，选择无人机800帧的数据，在X、Y、Z三个方向得到的结果分别如图~\ref{fig:5Test_pose_xyz}所示,其中蓝色连线为视觉算法检测出的坐标值，红色连线无人机GPS检测出的真实值。
 \begin{figure}[h]
   \centering
     \subcaptionbox{X方向GPS和视觉算法对比图}{\label{fig:chap1:pose_x}
@@ -137,11 +127,10 @@
     \includegraphics[width=6cm]{pose_y.png}}
   \vskip0.5cm
     \subcaptionbox{Z方向GPS和视觉算法对比图}{\label{fig:chap1:pose_z}
-    \includegraphics[width=6cm]{pose_z.png}\hskip2cm}
+    \includegraphics[width=6cm]{pose_z.png}}
   \caption{各方向GPS和视觉算法对比图}\label{fig:chap2:pose_xyz}
 \end{figure}
-随后，计算真值和测量值之间的误差，在X、Y、Z方向分别得到结果如图~\ref{fig:chap2:pose_error_xyz}所示，对于X、Y、Z三个方向分别可以
-得到距离误差为0.22m、0.37m、0.107m。
+随后，计算真值和测量值之间的误差，在X、Y、Z方向分别得到结果如图~\ref{fig:5Test_pose_error_xyz}所示，对于X、Y、Z三个方向分别可以得到距离误差为0.22m、0.37m、0.107m。
 \begin{figure}[H]
     \centering
       \subcaptionbox{X方向GPS和视觉算法对比图}{\label{fig:chap1:pose_error_x}
@@ -154,29 +143,21 @@
       \includegraphics[width=12cm]{pose_error_z.png}}
     \caption{各方向GPS和视觉算法误差对比图}\label{fig:chap2:pose_error_xyz}
 \end{figure}
-最后，对无人机的轨迹精度进行对比。无人机在自主飞行过程中能够产生实时的相对于真实世界坐标系的定位信息，将其与GPS生成的定位信息
-进行对比，如图~\ref{fig:pose_map}所示。
+最后，对无人机的轨迹精度进行对比。无人机在自主飞行过程中能够产生实时的相对于真实世界坐标系的定位信息，将其与GPS生成的定位信息进行对比，如图~\ref{fig:5Test_pose_map}所示。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=10cm]{pose_map.png}
+  \includegraphics[height=10cm]{5Test_pose_map.png}
   \caption{无人机轨迹对比示意图}
-  \label{fig:pose_map}
+  \label{fig:5Test_pose_map}
 \end{figure}
-对于无人机的直飞路线，误差较小，GPS和视觉算法测算出的轨迹基本吻合，但是在对于转弯改变方向的区间，两者之间的相对误差则较大,考虑
-其原因为在转弯处所设计的循迹点相对比较稠密，导致在该区域内无人机需要改变的方向更大，导致视觉算法在测算时由于方法振动的缘故产生
-较大的误差。
-
-
-
-
-
+对于无人机的直飞路线，误差较小，GPS和视觉算法测算出的轨迹基本吻合，但在转弯方向改变的区间，两者之间的相对误差则较大,考虑其原因为在转弯处所设计的循迹点相对比较稠密，导致在该区域内无人机需要改变的方向更大，视觉算法在测算时由于方法振动的缘故产生较大的误差。
 \section{三维重建系统测试}
 \label{sec:5.3}
 在本文~\ref{sec:3.2.3}节中，提出了三维重建存在的一些问题，包括对场景进行三维重建时，匹配耗时严重和点云准确性较低，甚至无法重建出三维点云，
 本实验将结合~\ref{sec:3.3}节提出的方法对三维重建进行改进。
 \subsection{匹配实效性测试}
-通过~\ref{sec:3.3.2}节对输入图像匹配模式的分析，本实验共选择150张图像（图片选择过少的话，各匹配模式之间的耗时差异会过小）作为输入图片，每
-张图像的大小为960*544。各匹配模式包括完全匹配，序列匹配，空间匹配，传递匹配和自定义匹配，对于空间匹配，在对室内堆体三维重建时，难以获取准确的空间位置信息，本实验将排除该匹配方式的对比
+通过~\ref{sec:3.3.2}节对输入图像匹配模式的分析，本实验共选择150张图像（图片选择过少的话，各匹配模式之间的耗时差异会过小）作为输入图片，每张图像的大小为960*544。各匹配模式包括完全匹配，序列匹配，空间匹配，传递匹配和自定义匹配，对于空间匹配，在对室内堆体三维重建时，难以获取准确的空间位置信息，本实验将排除该匹配方式的对比
+
 其中自定义匹配以实时运行的SLAM匹配信息作为匹配结果。SLAM处理代码如~\ref{code:SLAM_process}下：
 \begin{lstlisting}[
   language=C++,
@@ -213,12 +194,8 @@ if (mpCurrentKeyFrame->mnId > 4)
    << translation.at<float>(2) 
    << std::endl;
   }
-
 \end{lstlisting}
-
-对任意一帧图像，在SLAM处理后只处理并保存关联关键帧大于4帧的图像，依次获取与该帧匹配度最高的4帧和该帧所对应的位
-姿（R，t）结果如表~\ref{tab:SLAM_result}所示。
-
+对任意一帧图像，在SLAM处理后只处理并保存关联关键帧大于4帧的图像，依次获取与该帧匹配度最高的4帧和该帧所对应的位姿（R，t），结果如表~\ref{tab:SLAM_result}所示。
 \begin{table}[h]
   \centering
   \caption{SLAM处理结果}
@@ -244,7 +221,6 @@ if (mpCurrentKeyFrame->mnId > 4)
   \bottomrule
   \end{tabular}
 \end{table}
-
 各个匹配模式之间的耗时情况和匹配准确度如表~\ref{tab:match_compare}所示。
 \begin{table}[h]
   \centering
@@ -261,70 +237,59 @@ if (mpCurrentKeyFrame->mnId > 4)
   \bottomrule
   \end{tabular}
 \end{table}
-
-
-
+由表可以分析得到，以SLAM实时运行的匹配结果作为三维重建的匹配输入，一方面可以节省下匹配所耗费的时间，另外SLAM通过对时序图像的分析，可以得到更加准确的匹配信息。
 \subsection{点云精度测试}
-在面对部分重复度高，表面问题贫瘠的场景中，三维重建往往难以生成有效的点云，按照第节提出的方法可以以SLAM生成的keyFrame Database
-作为先验知识来改善三维重建的结果。本实验考虑到地下车库场景重复度高，且存在反光现象，选择了地下车库作为实验场景，按照环形有闭环的
-路径采集了一系列图像，部分图像如~\ref{test_3D_garage}所示。
-如图~\ref{fig:test_3D_garage}所示
+在面对部分重复度高，表面问题贫瘠的场景中，三维重建往往难以生成有效的点云，按照第3.3.2节提出的方法可以以SLAM生成的keyFrame Database等信息作为先验知识来改善三维重建的结果。本实验考虑到地下车库场景重复度高，且存在反光现象，选择了地下车库作为实验场景，按照环形有闭环的路径采集了一系列图像，部分图像如~\ref{5Test_3D_garage}所示。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=6cm,width=9.7cm]{test_3D_garage.png}
+  \includegraphics[height=6cm,width=9.7cm]{5Test_3D_garage.png}
   \caption{地下车库环形图像}
-  \label{fig:test_3D_garage}
+  \label{fig:5Test_3D_garage }
   \end{figure}
-对于普通三维重建方法而言，地下车库场景重建场景点云难度较大，因为场景中的场景重复度高，匹配精度较低，且反光场景的加入又会导致相机
-的位姿估计出现偏差，三维重建无法生成有效的点云结果，如图~\ref{fig:test_3D_badresult}所示。因此需要结合SLAM的结果来作为三维
-重建的先验知识，可以重建出较好的结果，结果如图~\ref{fig:test_3D_goodresult}所示。
-  \begin{figure}[h]
+分别以传统方法和改进后的方法对其进行三维重建，结果分别如图~\ref{fig:test_3D_badresult}和~\ref{fig:test_3D_goodresult}所示。
+\begin{figure}[h]
   \centering
-    \subcaptionbox{结合SLAM三维重建}{\label{fig:test_3D_goodresult}
-    \includegraphics[height=6cm,width=9.7cm]{test_3D_goodresult.png}}
+    \subcaptionbox{结合SLAM三维重建\label{fig:test_3D_badresult}}{
+    \includegraphics[height=5cm,width=9.7cm]{test_3D_badresult.png}}
   \vskip0.5cm
-    \subcaptionbox{直接三维重建}{\label{fig:test_3D_badresult}
-    \includegraphics[height=6cm,width=9.7cm]{test_3D_badresult.png}}
+    \subcaptionbox{直接三维重建\label{fig:test_3D_goodresult}}{
+    \includegraphics[height=5cm,width=9.7cm]{test_3D_goodresult.png}}
   \caption{地下车库三维重建对比图}\label{fig:test_3D}
 \end{figure}
-
+对于普通三维重建方法而言，地下车库场景重建场景点云难度较大，因为场景中的场景重复度高，匹配精度较低，且反光场景的加入又会导致相机的位姿估计出现偏差，三维重建无法生成有效的点云结果。因此需要结合SLAM的结果来作为三维重建的先验知识，提供更多丰富的匹配约束以及更加精准的相机位姿，可以重建出较好的结果。
 \section{堆体体积测量系统测试}
 \label{sec:5.4}
-在第四章，本文提出了一种基于纯视觉方法来测算场景中物体体积的方法，基于对实验场景进行的三维重建结果，整个实验步骤主要包括以下
-四个方面1）解析水平面方程2）估计场景实际尺度3）点云提纯4）计算三维点云的体积。在对测算场景体积之前，需要收集该场景的连续视频
-帧以获取其三维重建的结果，考虑到稠密点云的点集数量过大，在遍历和查询时都会比较耗时，且稀疏点云也包含了每个特征点的坐标信息和
-相机的位姿信息，后续在解析水平面方程和估计场景实际尺度时选择稀疏点云作为分析对象。
+在第4章，本文提出了一种基于纯视觉方法来测量堆体体积的方法，基于对实验场景进行的三维重建结果，整个实验步骤主要包括以下四个方面：
+
+1. 解析水平面方程
+
+2. 估计场景实际尺度
+
+3. 点云提纯
+
+4. 计算三维点云的体积。
+
+在测量堆体场景体积之前，需要收集该场景的连续视频帧以获取其三维重建的结果，考虑到稠密点云的点集数量过大，在遍历和查询时都会比较耗时，且稀疏点云也包含了每个特征点的坐标信息和相机的位姿信息，后续在解析水平面方程和估计场景实际尺度时选择稀疏点云作为分析对象。
+
 \subsection{解析水平面方程}
 \label{sec:5.4.1}
-1.	场景布置：在待测场景中需要布置多个不同的Aruco二维码,一方面提高场景三维重
-建的稳定性和准确性，另外进一步为后续水平面方程的解析提供数据。在布置场景时，需要注意两个问题：1）若所布置的所有Aruco二维码的
-所有下边沿都位于同一条直线上； 2）应该尽可能将所有Aruco的二维码的下边沿都与待求水平面贴合，以保证水平面方程求解的准确性，若
-无法实现水平面的贴合要求，则需要进一步保证所有下边沿都位于同一水平面上，那么对计算得到的水平面进行空间变换即可得到真实水平面
-方程。
+1. 场景布置：在待测堆体场景中需要布置多个不同的二维码,一方面提高场景三维重建的稳定性和准确性，另外进一步为后续水平面方程的解析提供数据。在布置场景时，需要注意两个问题：1）布置的二维码的所有下边沿都位于同一条直线上；2）应该尽可能将所有Aruco的二维码的下边沿都与待求水平面贴合，以保证水平面方程求解的准确性，若无法实现水平面的贴合要求，则需要进一步保证所有下边沿都位于同一水平面上，那么对计算得到的水平面进行空间变换即可得到真实水平面方程。
 
-2.	数据收集：可以通过单目相机对场景进行连续采集，在采集视频的过程中需要保证大部分视频帧中都能够采集到完成的二维码，所有的采
-集结果如图~\ref{fig:getVolume_inputCamera}所示。
-
+2. 数据收集：可以通过单目相机对堆体场景进行连续采集，在采集视频的过程中需要保证大部分图像帧中都能够采集到完整的二维码，所有的采集结果如图~\ref{fig:5Test_inputCamera}所示。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=6cm]{getVolume_inputCamera_1.png}
-  \caption{三维重建输入视频序列图}
-  \label{fig:getVolume_inputCamera}
-  \end{figure}
-
-3.	三维重建：可以直接将上述这些包含二维码的视频帧序列作为三维重建的输入以获取场景的点云，重建的结果如图
-~\ref{fig:getVolume_3dconstr_noplane}所示。
+  \includegraphics[height=6cm]{5Test_inputCamera.png}
+  \caption{堆体场景图像序列}
+  \label{fig:5Test_inputCamera}
+\end{figure}
+3.	三维重建：可以直接将上述这些包含二维码的图像序列作为三维重建的输入，以获取堆体场景的三维点云，重建的结果如图~\ref{fig:5Test_3dconstr_noplane}所示。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=6cm]{getVolume_3dconstr_noplane_1.png}
+  \includegraphics[height=6cm]{5Test_3dconstr_noplane.png}
   \caption{三维重建点云结果示意图}
-  \label{fig:getVolume_3dconstr_noplane}
+  \label{fig:5Test_3dconstr_noplane}
   \end{figure}
-
-4.	按照4.2.1和4.2.2小节的方式获取2D图像中的角点坐标和对应的三维重建的3D坐标，部分对应关系如
-表~\ref{tab:chap1:2D_3D}所示。其中最近的2D坐标代表通过三维重建获进行特征点提取时的最近坐标，
-当3D为-1时，则代表三维重建中的点云没有和该2D图像相对应的3D点。
-
+4.	按照4.2.1节的方式获取2D图像中的角点坐标和对应的三维重建的3D坐标，部分对应关系如表~\ref{tab:chap1:2D_3D}所示。其中最近的2D坐标代表通过三维重建获进行特征点提取时的最近坐标，当3D为-1时，则代表三维重建中的点云没有和该2D图像相对应的3D点。
 \begin{table}[h]
   \centering
   \caption{2D坐标和3D坐标关系对应表}
@@ -353,27 +318,23 @@ if (mpCurrentKeyFrame->mnId > 4)
   \end{tabular}
 \end{table}
 
-5.	添加方程：根据4.2.3小节提出的方法，通过上述三维点可以计算出平面方程的参数，可以在原本缺失水平面的点云中按照解析方程添加
-点云即可，结果如图~\ref{fig:getVolume_3dconstr}所示,其中红色点云即为水平面。
+5. 添加方程：根据4.2.3小节提出的方法，通过上述三维点可以计算出平面方程的参数，可以在原本缺失水平面的点云中按照解析方程添加点云即可，结果如图~\ref{fig:5Test_getVolume_3dconstr}所示,其中红色点云即为水平面。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=6cm]{getVolume_3dconstr_1.png}
-  \caption{三维重建输入视频序列图}
-  \label{fig:getVolume_3dconstr}
+  \includegraphics[height=6cm]{5Test_getVolume_3dconstr.png}
+  \caption{包含水平面的三维重建结果示意图}
+  \label{fig:5Test_getVolume_3dconstr}
   \end{figure}
-
 \subsection{估计堆体实际尺度}
 \label{sec:5.4.2}
-1.	获取绝对尺度:根据图~\ref{fig:getVolume_Kabs}所示,分别可以获得在ID = 43的二维码坐标系下的相机位姿，如表~\ref{tab:chap1:2D_3D}
-前两行，可以计算出在这两帧之间相机移动的绝对距离为0.464m。
+1. 获取绝对尺度:根据图~\ref{fig:5Test_get_Kabs}所示,分别可以获得在ID = 43的二维码坐标系下的相机位姿，如表~\ref{tab:chap1:2D_3D}前两行，可以计算出在这两帧之间相机移动的绝对距离为0.464m。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=8cm]{getVolume_Kabs.png}
-  \caption{绝对尺度}
-  \label{fig:getVolume_Kabs}
+  \includegraphics[height=4cm]{5Test_get_Kabs.png}
+  \caption{两帧之间获取绝对尺度}
+  \label{fig:5Test_get_Kabs}
   \end{figure}
-2.	获取相对尺度：从三维重建的结果中提取出这两帧在参考坐标系下的相机位姿，如表~\ref{tab:chap1:2D_3D}后两行，可以计算出这在这两帧之
-间相机移动的相对距离为4.924。
+2. 获取相对尺度：从三维重建的结果中提取出这两帧在参考坐标系下的相机位姿，如表~\ref{tab:chap1:2D_3D}后两行，可以计算出这在这两帧之间相机移动的相对距离为4.924。
 \begin{table}[h]
   \centering
   \caption{2D坐标和3D坐标关系对应表}
@@ -389,26 +350,34 @@ if (mpCurrentKeyFrame->mnId > 4)
   \bottomrule
   \end{tabular}
 \end{table}
-
-3.	估计尺度：按照公式~\ref{equ:getVolume_K}可以简略估计出该煤堆场景实际大小和三维重建结果的尺度大小之间的尺因子
-K = 10.61。
+3. 估计尺度：按照公式~\ref{equ:getVolume_K}通过多组数据优化估计出堆体三维重建和实际堆体之间的尺度因子大小为K = 10.61。
 \subsection{堆体体积估计}
-针对体积测量实验，本文拟采用如下方式验证所提方法是否能够测量出堆体体积，以及是否满足精度要求：首先使用测量仪器检测出待测堆体
-的实际体积真值，随后将堆体分别摆放成单个堆体，两个堆体，三个堆体的形式，按照第~\ref{cha:chap4}章的流程，检测三次实验是否和
-真值之间的误差衡量视觉算法的精确度，以及三次测量值之间的数值比较，衡量视觉算法测量的稳定性。具体步骤如下：\\
-1. 将某一堆体放置在水平面上，并在堆体周围放置5个二维码以估计尺度和水平面方程。\\
-2. 对上述场景以视频的形式进行图像采集，提取视频中的图像，将数据集的数量控制在200张左右，且每张图像的分辨率在50万左右。\\
-3. 对上述采集到的图像进行二维码检测与识别，记录下每张图像中的二维码ID以及角点坐标。。\\
-4. 对上述采集到的图像进行稀疏重建，记录下稀疏点云中的3D点和每张图像角点之间的映射关系。\\
-5. 按照~\ref{sec:4.2}估计堆体出水平面方程。\\
-6. 按照~\ref{sec:4.3}估计出堆体的尺度大小。\\
-7. 对稀疏点云进行稠密重建，并将所求解出的水平面方程添加至稠密点云中。\\
-8. 按照~\ref{sec:4.4}估计出当前堆体的体积大小。\\
-9. 将单个堆体分别设计成2个堆体和3个堆体的情况，重复步骤2$~$8，计算不同场景对应的体积。\\
+针对体积测量实验，本文拟采用如下方式验证所提方法是否能够测量出堆体体积，以及验证测量和测量稳定性。
+
+首先使用测量仪器检测出待测堆体的实际体积真值，随后将堆体分别摆放成单峰堆体，双峰堆体，多峰堆体的形式，按照第~\ref{cha:chap4}章的流程，通过验证三次实验测量值和真值之间的误差衡量视觉算法的精确度，以及对三次测量值之间的数值进行比较，衡量视觉算法测量的稳定性。具体步骤如下：
+
+1. 将某一堆体放置在水平面上，并在堆体周围放置5个二维码以估计尺度和水平面方程。
+
+2. 对上述场景以视频的形式进行图像采集，提取视频中的图像，将数据集的数量控制在200张左右，且每张图像的分辨率在50万左右。
+
+3. 对上述采集到的图像进行二维码检测与识别，记录下每张图像中的二维码ID以及角点坐标。
+
+4. 对上述采集到的图像进行稀疏重建，记录下稀疏点云中的3D点和每张图像角点之间的映射关系。
+
+5. 按照~\ref{sec:4.2}估计堆体出水平面方程。
+
+6. 按照~\ref{sec:4.3}估计出堆体的尺度大小。
+
+7. 对稀疏点云进行稠密重建，并将所求解出的水平面方程添加至稠密点云中。
+
+8. 按照~\ref{sec:4.4}估计出当前堆体的体积大小。
+
+9. 将单个堆体分别设计成2个堆体和3个堆体的情况，重复步骤2$~$8，计算不同场景对应的体积。
+
 10 根据结果定量分析上述视觉算法测量堆体的准确性和稳定性。
 
-结果如表~\ref{tab:volume_test_1}$\textasciitilde$~\ref{tab:volume_test_3}所示。
-\begin{table}[htb]
+3次实验结果如表~\ref{tab:volume_test_1}，~\ref{tab:volume_test_2}，~\ref{tab:volume_test_3}所示。
+\begin{table}[h]
   \centering
   \caption{体积测量结果-\uppercase\expandafter{\romannumeral1}}
   \label{tab:volume_test_1}
@@ -423,7 +392,7 @@ K = 10.61。
   \end{tabular}
 \end{table}
 
-\begin{table}[htb]
+\begin{table}[h]
   \centering
   \caption{体积测量结果-\uppercase\expandafter{\romannumeral2}}
   \label{tab:volume_test_2}
@@ -439,7 +408,7 @@ K = 10.61。
 \end{table}
 
 
-\begin{table}[htb]
+\begin{table}[h]
   \centering
   \caption{体积测量结果-\uppercase\expandafter{\romannumeral3}}
   \label{tab:volume_test_3}
@@ -456,4 +425,12 @@ K = 10.61。
 
 
 \section{本章小结}
+本章分模块测试了无人机在非GPS场景下依靠纯视觉进行定位的效果与精度，以及改进后的三维重建的效果和基于纯视觉的堆体体积测量算法的准确度和稳定性。
+
+本章分模块测试了无人机在非GPS场景下依靠纯视觉进行定位的效果与精度，以及改进后的三维重建的效果和基于纯视觉的堆体体积测量算法的准确度和稳定性。
+
+本章分模块测试了无人机在非GPS场景下依靠纯视觉进行定位的效果与精度，以及改进后的三维重建的效果和基于纯视觉的堆体体积测量算法的准确度和稳定性。
+本章分模块测试了无人机在非GPS场景下依靠纯视觉进行定位的效果与精度，以及改进后的三维重建的效果和基于纯视觉的堆体体积测量算法的准确度和稳定性。
+
+本章分模块测试了无人机在非GPS场景下依靠纯视觉进行定位的效果与精度，以及改进后的三维重建的效果和基于纯视觉的堆体体积测量算法的准确度和稳定性。
 本章分模块测试了无人机在非GPS场景下依靠纯视觉进行定位的效果与精度，以及改进后的三维重建的效果和基于纯视觉的堆体体积测量算法的准确度和稳定性。
