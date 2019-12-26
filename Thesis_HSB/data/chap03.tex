@@ -14,7 +14,7 @@
 三维重建是指从三维图像中复原三维场景或者物体的过程，整个流程的输入为无序的图片即可，输出可以得到三维重建后的稀疏点云和稠密点，大致流程如图~\ref{fig:3Dconstr_pipiline_sfm}所示。
 \begin{figure}[H] % use float package if you want it here
     \centering
-    \includegraphics[width=12cm]{3Dconstr_pipiline_sfm.png}
+    \includegraphics[width=10cm]{3Dconstr_pipiline_sfm.png}
     \caption{三维重建流程图}
     \label{fig:3Dconstr_pipiline_sfm}
 \end{figure}
@@ -33,7 +33,7 @@
 三维重建的一般步骤可以简化为如图~\ref{fig:3Dconstr_pipiline}所示。
 \begin{figure}[H] % use float package if you want it here
     \centering
-    \includegraphics[width=12cm]{3Dconstr_pipiline.png}
+    \includegraphics[width=10cm]{3Dconstr_pipiline.png}
     \caption{三维重建具体实现步骤图}
     \label{fig:3Dconstr_pipiline}
     \end{figure}
@@ -66,7 +66,7 @@
 目前三维重建仅需要输入无序图片，在构图的过程中，可以极大地降低操作的复杂度，并且对于相机的内参和外参也无需提前提供给整个三维重建的系统，在重建过程中，这些参数都可以计算得到。对于输入的图像，可以通过随着时间流单帧拍摄的方式获取或者通过截取视频流的方式得到，且图像之间不能仅有纯旋转，这样无法估计深度。对于堆体场景的图形采集，如图~\ref{fig:3Dconstr_get_picture}所示，需要注意保证每连续两帧图像之间尽可能保证30$\%$的重叠区域，相邻两帧之间的旋转角度为30度到45度之间，且物体中的每一个点至少能被三帧图像观测到。
 \begin{figure}[h] % use float package if you want it here
   \centering
-  \includegraphics[width=12cm]{3Dconstr_get_picture.png}
+  \includegraphics[width=10cm]{3Dconstr_get_picture.png}
   \caption{堆体图像采集示意图}
   \label{fig:3Dconstr_get_picture}
   \end{figure}
@@ -110,7 +110,7 @@
 \textbf{FAST特征点：}对图像中的中的一个像素p，假设其亮度值为$I_p$，阈值为t，如图所示，取以其为中心，半径为是三个像素的圆，圆上共有16个像素点，假设这16个点中有连续N个点都比$I_p+t$大或者比$I_p-t$小，则认定其为Fast角点，如图~\ref{fig:3Dconstr_Fast}所示,为了加快检测过程，会直接检测第1,5,9,13这4个点，如果有三个满足要求，也会认为是角点。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=6cm]{3Dconstr_Fast.png}
+  \includegraphics[height=4.5cm]{3Dconstr_Fast.png}
   \caption{FAST特征点}
   \label{fig:3Dconstr_Fast}
 \end{figure}
@@ -137,15 +137,15 @@
 \begin{figure}[H]
     \centering
       \subcaptionbox{第1帧图像特征提取\label{fig:3Dconstr_a}}{
-      \includegraphics[width=6cm]{3Dconstr_a.png}}
+      \includegraphics[width=4.5cm]{3Dconstr_a.png}}
       \subcaptionbox{第2帧图像特征提取\label{fig:3Dconstr_b}}{
-      \includegraphics[width=6cm]{3Dconstr_b.png}}
+      \includegraphics[width=4.5cm]{3Dconstr_b.png}}
     \vskip0.5cm
       \subcaptionbox{特征点匹配示意图\label{fig:3Dconstr_match}}{
-      \includegraphics[width=12cm]{3Dconstr_match.png}}
+      \includegraphics[width=10cm]{3Dconstr_match.png}}
     \vskip0.5cm
       \subcaptionbox{RANSAC后的特征匹配示意图\label{fig:3Dconstr_matchAfterRansac}}{
-      \includegraphics[width=12cm]{3Dconstr_matchAfterRansac.png}}
+      \includegraphics[width=10cm]{3Dconstr_matchAfterRansac.png}}
     \caption{特征提取与匹配结果示意图}
     \label{fig:3Dconstrmatch}
 \end{figure}
@@ -160,7 +160,7 @@
 当所有的两两匹配图像对被确定以后，可以开始计算相机的位姿（3*3的旋转矩阵R，1*3的平移向量t），摄像机的内参（焦距f，畸变参数$k_1$，$k_2$）。几何场景提供轨迹中的每个3D点$X_j$，通过投影方程，将3D点投影到摄像机的2D成像平面上，投影误差的定义为投影点和图像上真实点之间的欧式距离,如图~\ref{fig:3Dconstr_reprojection-error}所示。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[width=8cm]{3Dconstr_reprojection-error.png}
+  \includegraphics[width=5cm]{3Dconstr_reprojection-error.png}
   \caption{误差投影示意图}
   \label{fig:3Dconstr_reprojection-error}
 \end{figure}
@@ -178,7 +178,7 @@ SfM是指从运动中恢复结构的过程，而MVS则是多视角立体视觉�
 对于极线搜索和块匹配技术，如图~\ref{fig:3Dconstr_jixiansousuo}所示。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[width=8cm]{3Dconstr_jixiansousuo.png}
+  \includegraphics[width=5cm]{3Dconstr_jixiansousuo.png}
   \caption{极线搜索示意图}
   \label{fig:3Dconstr_jixiansousuo}
 \end{figure}
@@ -203,7 +203,7 @@ S{(A,B)}_{SSD}=\sum_{i,j}(A(i,j)-B{(i,j))}^2
 根据以上流程，可以对图~\ref{fig:2VSLAM_big}所示的连续堆体图像进行三维重建，堆体点云重建结果如图~\ref{fig:3dconstr_sparse}所示。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[width=12cm]{3dconstr_sparse.png}
+  \includegraphics[width=10cm]{3dconstr_sparse.png}
   \caption{堆体稀疏重建示意图}
   \label{fig:3dconstr_sparse}
 \end{figure}
@@ -217,18 +217,18 @@ S{(A,B)}_{SSD}=\sum_{i,j}(A(i,j)-B{(i,j))}^2
 \begin{figure}[t]
   \centering
     \subcaptionbox{正面}{\label{fig:chap1:3dconstr_stone1}
-    \includegraphics[width=4cm,height=5cm]{3dconstr_stone1.JPG}}
+    \includegraphics[width=3.5cm,height=4.5cm]{3dconstr_stone1.JPG}}
     \subcaptionbox{斜侧面}{\label{fig:chap1:3dconstr_stone2}
-    \includegraphics[width=4cm,height=5cm]{3dconstr_stone2.JPG}}
+    \includegraphics[width=3.5cm,height=4.5cm]{3dconstr_stone2.JPG}}
     \subcaptionbox{侧面}{\label{fig:chap1:3dconstr_stone3}
-    \includegraphics[width=4cm,height=5cm]{3dconstr_stone3.JPG}}
+    \includegraphics[width=3.5cm,height=4.5cm]{3dconstr_stone3.JPG}}
   \vskip0.5cm
   \subcaptionbox{无法闭合}{\label{fig:chap1:3Dconstr_stone1}
-  \includegraphics[width=4cm,height=5cm]{3Dconstr_stone1.png}}
+  \includegraphics[width=3.5cm,height=4.5cm]{3Dconstr_stone1.png}}
   \subcaptionbox{缺失较多}{\label{fig:chap1:3Dconstr_stone2}
-  \includegraphics[width=4cm,height=5cm]{3Dconstr_stone2.png}}
+  \includegraphics[width=3.5cm,height=4.5cm]{3Dconstr_stone2.png}}
   \subcaptionbox{噪音点多}{\label{fig:chap1:3Dconstr_stone3}
-  \includegraphics[width=4cm,height=5cm]{3Dconstr_stone3.png}}
+  \includegraphics[width=3.5cm,height=4.5cm]{3Dconstr_stone3.png}}
   \caption{自然场景三维重建结果示意图}\label{fig:3dconstr_stone}
 \end{figure} 
 \section{三维重建优化方案研究}
@@ -268,10 +268,11 @@ S{(A,B)}_{SSD}=\sum_{i,j}(A(i,j)-B{(i,j))}^2
 5. 自定义匹配：即在系统进行匹配查找时，就将所有的匹配关系自定义给出，以自定义的匹配结果代替三维重建中的匹配方法。
 
 对于上述几种匹配模式，需要同时考虑到匹配时效和匹配精度的问题。排除空间匹配的方法，因为在密闭的环境中很难获取到每一帧图像对应的真实GPS信息，图像所自带的EXIF信息也会受到GPS强弱的影响，此外通过无人机获取到得到图像，即使有两帧之间的空间位置十分接近，也无法保证两帧图像具备匹配关系，例如在无人机正反来回的的两帧即使空间位置十分接近，也不一定是匹配帧。
+
 对于自定义的匹配模式，本文将以SLAM的结果提供给三维重建进行图像匹配，即以有序化的图像输入代替无序化的图像输入，一方面可以避免完全匹配带来的耗时问题，同时具备时序信息的SLAM所产生的匹配结果更加精确。对于具体的实现过程，以连续视频流作为SLAM系统的输入，筛选出其中的关键帧和所有关键帧之间的对应关系，将SLAM中的关键帧作为三维重建的图像输入，关键帧之间的匹配关系作为三维重建的先验匹配结果，具体流程如图~\ref{fig:3Dconstr_SLAM_pipeline}所示。
 \begin{figure}[t] % use float package if you want it here
   \centering
-  \includegraphics[height=12cm]{3Dconstr_SLAM_pipeline.png}
+  \includegraphics[height=9cm]{3Dconstr_SLAM_pipeline.png}
   \caption{融合SLAM结果的三维重建流程图}
   \label{fig:3Dconstr_SLAM_pipeline}
 \end{figure}
@@ -298,14 +299,14 @@ S{(A,B)}_{SSD}=\sum_{i,j}(A(i,j)-B{(i,j))}^2
 本文所提出的SLAM系统整体框架如图~\ref{fig:3d_constr_online_SLAM.png}所示。系统的输入为单目相机（内参标定结果已知）。SLAM系统有前端-后端两个部分构成，前端进行特征提取及数据关联，后端进行图模型建模及Maximum a Posteriori优化。
 \begin{figure}[h] % use float package if you want it here
   \centering
-  \includegraphics[height=5cm]{3d_constr_online_SLAM.png}
+  \includegraphics[height=4.5cm]{3d_constr_online_SLAM.png}
   \caption{前视SLAM整体框架}
   \label{fig:3d_constr_online_SLAM.png}
 \end{figure}
 当前主流vSLAM通过多线程技术维护3个模块，实现前端-后端的各项功能，如图~\ref{fig:3d_constr_SLAM}所示。系统以地图数据为核心，以BA图模型优化为手段，实现了相机追踪、地图维护、闭环优化。
 \begin{figure}[t] % use float package if you want it here
   \centering
-  \includegraphics[height=11cm]{3d_constr_SLAM.png}
+  \includegraphics[height=9cm]{3d_constr_SLAM.png}
   \caption{SLAM系统框架图}
   \label{fig:3d_constr_SLAM}
 \end{figure}
@@ -321,7 +322,7 @@ S{(A,B)}_{SSD}=\sum_{i,j}(A(i,j)-B{(i,j))}^2
 本文3D重建以提高建图精度为目标，其流程如图~\ref{fig:3d_constr_pipeline_sfm_mvs}所示。首先基于在线SLAM结果建立粗糙Scene Graph及点云环境地图，以全局大尺度地图及运动轨迹为优化目标，使用鲁棒性更高的特征描述算子，利用高性能计算机的快速处理能力进行全局BA优化，得到更加精确的全局稀疏地图和运动轨迹。然后利用MVS技术对图像中的高梯度变化区域建立半稠密环境地图。利用MVS进行半稠密建图首先提取关键帧中的边沿特征，基于SfM优化过的可共视图模型利用triangulation计算融合边沿特征的深度信息。 
 \begin{figure}[t] % use float package if you want it here
   \centering
-  \includegraphics[height=6cm]{3d_constr_pipeline_sfm_mvs.png}
+  \includegraphics[height=4.5cm]{3d_constr_pipeline_sfm_mvs.png}
   \caption{离线3D重建技术流程图}
   \label{fig:3d_constr_pipeline_sfm_mvs}
 \end{figure}

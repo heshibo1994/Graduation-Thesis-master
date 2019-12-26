@@ -19,9 +19,9 @@
 \begin{figure}[H]
   \centering%
   \subcaptionbox{二维码原始图\label{fig:2VSLAM_Marker}}{%    
-    \includegraphics[height=6cm]{2VSLAM_Marker.png}}\hspace{3em}%
+    \includegraphics[height=4.5cm]{2VSLAM_Marker.png}}\hspace{1em}%
   \subcaptionbox{二维码梯度图\label{fig:2VSLAM_Marker_Gradient}}{%    
-    \includegraphics[height=6cm]{2VSLAM_Marker_Gradient.png}}
+    \includegraphics[height=4.5cm]{2VSLAM_Marker_Gradient.png}}s
   \caption{二维码原始图和梯度图}
   \label{fig:2VSLAM_MarkerandGradient}
 \end{figure}
@@ -36,7 +36,7 @@
 在检测二维码ID值之前，会先设定好一个包含所有二维码的字典，字典的大小即包含所有二维码的数量。检测出构成二维码的四边形后，需要对图像进行透视变化规范图像，随后通过设定阈值分离出二维码上的黑色位和白色位，通过位数情况判断出该二维码在字典中对应的特定ID值，识别结果如图~\ref{fig:2VSLAM_Marker_detection}所示。通过这样的方式检测和识别二维码具备非常好的鲁棒性，并且可以对错误值进行筛除。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[width=9.3cm,height=5.8cm]{2VSLAM_Marker_detection.png}
+  \includegraphics[width=6cm,height=3.8cm]{2VSLAM_Marker_detection.png}
   \caption{二维码识别结果示意图}
   \label{fig:2VSLAM_Marker_detection}
 \end{figure} 
@@ -66,10 +66,10 @@ SLAM是一个在导航的过程中同时进行建图的工作，在使用单目�
 \begin{figure}[h]
   \centering
     \subcaptionbox{自然场景示意图\label{fig:2VSLAM_environment_cross}}{
-    \includegraphics[width=12cm]{2VSLAM_environment_cross.png}}
-  \vskip1.2cm
+    \includegraphics[height=4.5cm,width=9cm]{2VSLAM_environment_cross.png}}
+  \vskip0.8cm
     \subcaptionbox{自然场景3D地图\label{fig:2VSLAM_environment_cross_map}}{
-    \includegraphics[width=12cm]{2VSLAM_environment_cross_map.png}}
+    \includegraphics[height=4.5cm,width=9cm]{2VSLAM_environment_cross_map.png}}
   \caption{包含二维码的构建地图示意图}
   \label{fig:2VSLAM_environment}
 \end{figure}
@@ -97,7 +97,7 @@ SLAM是一个在导航的过程中同时进行建图的工作，在使用单目�
 本文所提出的基于二维码的SLAM系统运行框图如图~\ref{fig:2VSLAM_pipeline}所示，与一般SLAM系统相比较，本文主要提出了添加二维码视觉标签的SLAM系统。该系统一直对地图进行维护，有新的信息加入时，则会对更新地图。在对堆体场景运行SLAM时，该地图为空，所以需要对其初始化。
 \begin{figure}[H] %  
 \centering
-\includegraphics[height=6.7cm,width=14cm]{2VSLAM_pipeline.png}
+\includegraphics[height=5.7cm,width=11cm]{2VSLAM_pipeline.png}
   \caption{基于二维码的SLAM流程图}
   \label{fig:2VSLAM_pipeline}
 \end{figure}
@@ -277,7 +277,7 @@ S E(3)=\left\{T=\left[\begin{array}{cc}{\mathbf{R}} & {\mathbf{t}} \\ {\mathbf{0
 对于针孔相机模型，如图~\ref{fig:2VSLAM_pinehole}所示，（其中f为相机焦距）存在4个坐标系分别为：世界坐标系，相机坐标系，图像坐标系和像素坐标系，对于真实世界中的空间点$P_w$（$X_w$，$Y_w$，$Z_w$），其对应的相机坐标系坐标为$P_c$（$C_w$，$C_w$，$C_w$）,对应的图像坐标系为$P^{'}$（$X^{'}$,$Y^{'}$），对应的像素坐标系为p（u，v）。
 \begin{figure}[H]
   \centering
-  \includegraphics[height=6cm]{2VSLAM_pinehole.png}
+  \includegraphics[height=4.5cm]{2VSLAM_pinehole.png}
   \caption{针孔相机模型}
   \label{fig:2VSLAM_pinehole}
 \end{figure}
@@ -376,9 +376,9 @@ T_{world}^{m} =\begin{bmatrix}T_{marker}^{w}\end{bmatrix}^{-1}
 \subsection{无人机自主定位设计}
 \label{sec:2.4.3}
 在根据以上章节，可以确定出在真实世界下相机的位姿结果，在具体的工程实践中，除了结合二维码的SLAM算法的研究，还需要考虑到先验地图的设定，数据的传输，相机的设定等问题，具体流程如图\ref{fig:2VSLAM_getPose_pipeline}所示。
-\begin{figure}[t] % use float package if you want it here
+\begin{figure}[h] % use float package if you want it here
   \centering
-  \includegraphics[height=14cm]{2VSLAM_getPose_pipeline.png}
+  \includegraphics[height=10cm]{2VSLAM_getPose_pipeline.png}
   \caption{获取真实位姿完整流程图}
   \label{fig:2VSLAM_getPose_pipeline}
 \end{figure}
@@ -474,7 +474,7 @@ if (Map_Flag == Save_Map)
 \textbf{设定相机参数：}相机的选择对基于纯视觉的无人机定位任务也很重要，作为SLAM系统的输入，必须选择一台成像质量高，稳定性强的相机。在实际工程中选择PointGrey （CM3-U3-31S4M-CS）工业相机来接受视觉信息，外形如图~\ref{fig:2VSLAM_pointgrey}所示，具体参数如表~\ref{tab:pointgrey}所示。
 \begin{figure}[H] 
   \centering
-  \includegraphics[height=6cm]{2VSLAM_pointgrey.png}
+  \includegraphics[height=4.5cm]{2VSLAM_pointgrey.png}
   \caption{PointGrey工业相机示意图}
   \label{fig:2VSLAM_pointgrey}
 \end{figure}
@@ -593,7 +593,7 @@ ros::Rate loop_rate(10);
     \subcaptionbox{Frame12}{\label{fig:2VSLAM_big12}
     \includegraphics[width=4cm]{2VSLAM_big12.jpg}}
 
-  \caption{面向堆体的无人机自主定位和飞行示意图}\label{fig:2VSLAM_big}
+  \caption{无人机采集堆体图像序列}\label{fig:2VSLAM_big}
 \end{figure}
 
 

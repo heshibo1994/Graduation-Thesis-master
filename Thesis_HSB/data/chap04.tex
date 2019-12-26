@@ -13,7 +13,7 @@
 在解决上述两个问题的基础上，就可以对堆体进行高度，面积或者体积的测量，对比传统方法中用激光雷达，或者称重器械来测算体积的方式，现在就可以通过单个摄像头以纯视觉的方式来完成上述过程，并获取到一个精确的结果。本章将以三维重建的点云结果为基础，为了解决点云的尺度问题，以及求解堆体三维点云的水平面方程，本文将在场景中引入二维码视觉标签，依靠其因为携带尺度信息和唯一ID值的特性估计出尺度信息，并且还具备易检出的角点坐标用来估计水平面方程。在获取到尺度和水平面方程后，结合点云信息可以再进一步计算三维场景的体积，具体流程如图~\ref{fig:4GetV_pipeline}所示。
 \begin{figure}[H] % use float package if you want it here
     \centering
-    \includegraphics[height=5cm]{4GetV_pipeline.png}
+    \includegraphics[height=4.5cm]{4GetV_pipeline.png}
     \caption{体积测算流程图}
     \label{fig:4GetV_pipeline}
   \end{figure}
@@ -26,7 +26,7 @@
 首先检测2D点，可以利用二维码检测算法检测出场景中二维码的ID值，位置，大小，角点坐标等信息，检测结果如图~\ref{fig:4GetV_Marker_detection}所示。因为在场景中，二维码的布置都会有下侧两个角点直接落在水平面上，因此可以认为所有二维码的下侧角点所构成的平面即是场景的水平面。那么接下来即可将水平面的求解转化为二维码角点所在平面的求解。在检测的过程中，需要将所有2D图片的索引和角点的位置记录下即可。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=8cm]{4GetV_Marker_detection.png}
+  \includegraphics[height=4.5cm]{4GetV_Marker_detection.png}
   \caption{二维码检测示意图}
   \label{fig:4GetV_Marker_detection}
 \end{figure}
@@ -174,7 +174,7 @@
 通过第~\ref{cha:chap3}章三维重建的流程，可以获取到每一个点在二维图像中和三维空间点之间的对应关系，如图~\ref{fig:4GetV_sizebyPoint}所示表示的是同一个点在二维和三维之间的对应。因为图像中的任意两个二维码角点之间的距离都是已知的，那么也可以得到三维坐标中任意两个角点之间的绝对尺度，将这一尺度因子应用到整个地图中进行缩放，即可获得一个带有真实尺度的地图。
 \begin{figure}[h] % use float package if you want it here
   \centering
-  \includegraphics[height=6cm]{4GetV_sizebyPoint.png}
+  \includegraphics[height=5cm]{4GetV_sizebyPoint.png}
   \caption{根据空间点估计尺度流程图}
   \label{fig:4GetV_sizebyPoint}
 \end{figure}
@@ -193,7 +193,7 @@
 流程图如图~\ref{fig:4GetV_volume}所示。
 \begin{figure}[h] % use float package if you want it here
   \centering
-  \includegraphics[height=10cm]{4GetV_volume.png}
+  \includegraphics[height=8cm]{4GetV_volume.png}
   \caption{纯视觉测量体积流程图}
   \label{fig:4GetV_volume}
 \end{figure}
@@ -212,17 +212,18 @@
   \caption{三维重建感兴趣区域示意图}
   \label{fig:4GetV_interesting}
 \end{figure}
-对于方案2，本文采用统计滤波器即为对每个点的邻域进行一个统计分析，并修剪掉一些不符合标准的点，具体方法为在输入数据中对点到临近点的距离分布的计算，对每一个点，计算它到所有临近点的平均距离（假设得到的结果是一个高斯分布，其形状是由均值和标准差决定），那么平均距离在标准范围之外的点，可以被定义为离群点并从数据中去除。采用统计滤波对点云中的离散点进行滤波对比如图~\ref{fig:4GetV_3dconstr_filter}所示。
+对于方案2，本文采用统计滤波器即为对每个点的邻域进行一个统计分析，并修剪掉一些不符合标准的点，具体方法为在输入数据中对点到临近点的距离分布的计算，对每一个点，计算它到所有临近点的平均距离（假设得到的结果是一个高斯分布，其形状是由均值和标准差决定），那么平均距离在标准范围之外的点，可以被定义为离群点并从数据中去除。采用统计滤波对点云中的离散点进行滤波对比如图~\ref{fig:4GetV_filter}所示。
 \begin{figure}[H]
   \centering
     \subcaptionbox{对点云统计滤波前}{\label{fig:4GetV_3dconstr_noise}
-    \includegraphics[width=8cm]{4GetV_3dconstr_noise.png}}
+    \includegraphics[height=4.5cm]{4GetV_3dconstr_noise.png}}
   \vskip0.5cm
     \subcaptionbox{对点云统计滤波后}{\label{fig:chap1:4GetV_3dconstr_nonoise}
- \includegraphics[width=8cm]{4GetV_3dconstr_nonoise.png}}
-  \caption{点云统计滤波前后效果对比示意图}\label{fig:4GetV_3dconstr_noise}
+ \includegraphics[height=4.5cm]{4GetV_3dconstr_nonoise.png}}
+  \caption{点云统计滤波前后效果对比示意图}\label{fig:4GetV_filter}
 \end{figure}
 通过以上步骤，可以求出有关堆体的有效3D点集，接下来需要将所有三维点云投影至二维平面上获取2D点集，简略步骤如下：
+
 1. 通过~\ref{sec:4.2}节获取点云水平面和参考坐标系中的xy平面方程的法向量分别为U(A,B,C)和V(0,0,1);
 
 2. 将所有的3D点集O($x_o$,$y_o$,$z_o$)根据以下公式投影水平面上，获取新的3D点集P($x_p$,$y_p$,$z_p$)；
@@ -259,7 +260,7 @@ d\;=\frac{\left|Ax_0+By_0+Cz_0+D\right|}{\sqrt{A^2+B^2+C^2}}
 通过~\ref{sec:4.2}小结，可以得到在由在同一平面上的3D点集转化成的2D点集和每一个2D点集对应的距离值d。在本节中将对2D点集进行三角剖分，获得Dealunay三角网，Delaunay三角网是一系列相连的但不重叠的三角形的集合, 而且这些三角形的外接圆不包含这个面域的其他任何点，如图~\ref{fig:4GetV_Delaunay}所示。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=6cm]{4GetV_Delaunay.png}
+  \includegraphics[height=4.5cm]{4GetV_Delaunay.png}
   \caption{Delaunay三角网示意图}
   \label{fig:4GetV_Delaunay}
 \end{figure}
@@ -276,9 +277,9 @@ d\;=\frac{\left|Ax_0+By_0+Cz_0+D\right|}{\sqrt{A^2+B^2+C^2}}
 \subsection{积分三棱柱}
 \label{sec:4.4.4}
 通过以上步骤，可以将三维重建后点云体积的求解转化成对多个三棱柱积分的求解，因为所有三棱柱的体积值都分布在某一个区间内（并不完全服从正太分布），对于部分偏差较大的三棱柱体积值应该通过算法进行剔除。本文采用箱形图的方法来处理这一问题，箱形图不受异常值的影响，能够准确稳定地描绘出数据的离散分布情况，同时也利于数据的清洗，箱形图如图~\ref{fig:4GetV_boxplot}所示。
-\begin{figure}[t] % use float package if you want it here
+\begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=6cm]{4GetV_boxplot.png}
+  \includegraphics[height=4.5cm]{4GetV_boxplot.png}
   \caption{箱形图示意图}
   \label{fig:4GetV_boxplot}
 \end{figure}

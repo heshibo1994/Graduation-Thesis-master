@@ -19,9 +19,9 @@
 \begin{figure}[H]
   \centering%
   \subcaptionbox{实验场景设计示意图\label{fig:5Test_scene_imagine}}{%    
-    \includegraphics[height=6cm,width=6cm]{5Test_scene_imagine.png}}\hspace{4em}%
+    \includegraphics[height=4.5cm,width=4.5cm]{5Test_scene_imagine.png}}\hspace{4em}%
   \subcaptionbox{实验场景真实布置图\label{fig:5Test_scene_reality}}{%    
-    \includegraphics[height=6cm,width=6cm]{5Test_scene_reality.png}}
+    \includegraphics[height=4.5cm,width=4.5cm]{5Test_scene_reality.png}}
   \caption{实验场景示意图}
   \label{fig:scene}
 \end{figure}
@@ -29,14 +29,14 @@
 在布置好场景后，需要根据实际场景生成地图信息。当无人机首次在无先验地图的环境下飞行时，为了保证后续飞行精度，可以先飞行一次建立场景的先验地图，在无人机的飞行过程中，其飞行区域需要尽可能覆盖所有场景以确保生成完整的地图，根据实际场景生成的地图如图~\ref{fig:5Test_map_generator}所示，其中正方形框代表二维码，蓝色相机表示代表视觉定位产生的关键帧，点代表地图中的特征点。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=6cm]{5Test_map_generator.png}
+  \includegraphics[height=5cm]{5Test_map_generator.png}
   \caption{视觉算法生成地图}
   \label{fig:5Test_map_generator}
 \end{figure}
 当获取到完整的地图信息地图后，可以让无人机按照认为规定的轨迹进行自动循迹飞行，首先设计如下图~\ref{fig:5Test_flight_route}所示的轨迹图，起飞点为ID=0的二维码处，红色箭头代表无人机的飞行轨迹，对于无人机的飞控过程，按照设定循迹点的方案来实现，在整个轨迹中给定多个循迹点坐标，使得无人机按照设定的坐标顺序进行飞行即可。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=8cm]{5Test_flight_route.png}
+  \includegraphics[height=5cm]{5Test_flight_route.png}
   \caption{无人机自主飞行轨迹设计图}
   \label{fig:5Test_flight_route}
 \end{figure}
@@ -114,7 +114,7 @@
 针对指标2，绘制出每个二维码在同一个坐标平面的误差情况，如图~\ref{fig:5Test_marker_map_error_Z}所示，平均误差为0.18m，可以认定所有二维码基本都在同一水平面内。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=8cm]{5Test_marker_map_error_Z.png}
+  \includegraphics[height=6cm]{5Test_marker_map_error_Z.png}
   \caption{二维码Z方向数据}
   \label{fig:5Test_marker_map_error_Z}
 \end{figure}
@@ -122,31 +122,31 @@
 \begin{figure}[h]
   \centering
     \subcaptionbox{X方向GPS和视觉算法对比图}{\label{fig:chap1:pose_x}
-    \includegraphics[width=6cm]{pose_x.png}\hskip2cm}
+    \includegraphics[width=5.5cm]{pose_x.png}\hskip2cm}
     \subcaptionbox{Y方向GPS和视觉算法对比图}{\label{fig:chap1:pose_y}
-    \includegraphics[width=6cm]{pose_y.png}}
+    \includegraphics[width=5.5cm]{pose_y.png}}
   \vskip0.5cm
     \subcaptionbox{Z方向GPS和视觉算法对比图}{\label{fig:chap1:pose_z}
-    \includegraphics[width=6cm]{pose_z.png}}
-  \caption{各方向GPS和视觉算法对比图}\label{fig:chap2:pose_xyz}
+    \includegraphics[width=5.5cm]{pose_z.png}}
+  \caption{各方向GPS和视觉算法对比图}\label{fig:5Test_pose_xyz}
 \end{figure}
 随后，计算真值和测量值之间的误差，在X、Y、Z方向分别得到结果如图~\ref{fig:5Test_pose_error_xyz}所示，对于X、Y、Z三个方向分别可以得到距离误差为0.22m、0.37m、0.107m。
 \begin{figure}[H]
     \centering
       \subcaptionbox{X方向GPS和视觉算法对比图}{\label{fig:chap1:pose_error_x}
-      \includegraphics[width=12cm]{pose_error_x.png}}
-    \vskip0.5cm
+      \includegraphics[width=10cm]{pose_error_x.png}}
+    \vskip0.35cm
       \subcaptionbox{Z方向GPS和视觉算法对比图}{\label{fig:chap1:pose_error_y}
-      \includegraphics[width=12cm]{pose_error_y.png}}
-    \vskip0.5cm
+      \includegraphics[width=10cm]{pose_error_y.png}}
+    \vskip0.35cm
       \subcaptionbox{Z方向GPS和视觉算法对比图}{\label{fig:chap1:pose_error_z}
-      \includegraphics[width=12cm]{pose_error_z.png}}
-    \caption{各方向GPS和视觉算法误差对比图}\label{fig:chap2:pose_error_xyz}
+      \includegraphics[width=10cm]{pose_error_z.png}}
+    \caption{各方向GPS和视觉算法误差对比图}\label{fig:5Test_pose_error_xyz}
 \end{figure}
 最后，对无人机的轨迹精度进行对比。无人机在自主飞行过程中能够产生实时的相对于真实世界坐标系的定位信息，将其与GPS生成的定位信息进行对比，如图~\ref{fig:5Test_pose_map}所示。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=10cm]{5Test_pose_map.png}
+  \includegraphics[height=8cm]{5Test_pose_map.png}
   \caption{无人机轨迹对比示意图}
   \label{fig:5Test_pose_map}
 \end{figure}
@@ -239,12 +239,12 @@ if (mpCurrentKeyFrame->mnId > 4)
 \end{table}
 由表可以分析得到，以SLAM实时运行的匹配结果作为三维重建的匹配输入，一方面可以节省下匹配所耗费的时间，另外SLAM通过对时序图像的分析，可以得到更加准确的匹配信息。
 \subsection{点云精度测试}
-在面对部分重复度高，表面问题贫瘠的场景中，三维重建往往难以生成有效的点云，按照第3.3.2节提出的方法可以以SLAM生成的keyFrame Database等信息作为先验知识来改善三维重建的结果。本实验考虑到地下车库场景重复度高，且存在反光现象，选择了地下车库作为实验场景，按照环形有闭环的路径采集了一系列图像，部分图像如~\ref{5Test_3D_garage}所示。
+在面对部分重复度高，表面问题贫瘠的场景中，三维重建往往难以生成有效的点云，按照第3.3.2节提出的方法可以以SLAM生成的keyFrame Database等信息作为先验知识来改善三维重建的结果。本实验考虑到地下车库场景重复度高，且存在反光现象，选择了地下车库作为实验场景，按照环形有闭环的路径采集了一系列图像，部分图像如~\ref{fig:5Test_3D_garage}所示。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=6cm,width=9.7cm]{5Test_3D_garage.png}
+  \includegraphics[height=5cm,width=9.7cm]{5Test_3D_garage.png}
   \caption{地下车库环形图像}
-  \label{fig:5Test_3D_garage }
+  \label{fig:5Test_3D_garage}
   \end{figure}
 分别以传统方法和改进后的方法对其进行三维重建，结果分别如图~\ref{fig:test_3D_badresult}和~\ref{fig:test_3D_goodresult}所示。
 \begin{figure}[h]
@@ -278,14 +278,14 @@ if (mpCurrentKeyFrame->mnId > 4)
 2. 数据收集：可以通过单目相机对堆体场景进行连续采集，在采集视频的过程中需要保证大部分图像帧中都能够采集到完整的二维码，所有的采集结果如图~\ref{fig:5Test_inputCamera}所示。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=6cm]{5Test_inputCamera.png}
+  \includegraphics[height=5.5cm]{5Test_inputCamera.png}
   \caption{堆体场景图像序列}
   \label{fig:5Test_inputCamera}
 \end{figure}
 3.	三维重建：可以直接将上述这些包含二维码的图像序列作为三维重建的输入，以获取堆体场景的三维点云，重建的结果如图~\ref{fig:5Test_3dconstr_noplane}所示。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=6cm]{5Test_3dconstr_noplane.png}
+  \includegraphics[height=5cm]{5Test_3dconstr_noplane.png}
   \caption{三维重建点云结果示意图}
   \label{fig:5Test_3dconstr_noplane}
   \end{figure}
@@ -321,7 +321,7 @@ if (mpCurrentKeyFrame->mnId > 4)
 5. 添加方程：根据4.2.3小节提出的方法，通过上述三维点可以计算出平面方程的参数，可以在原本缺失水平面的点云中按照解析方程添加点云即可，结果如图~\ref{fig:5Test_getVolume_3dconstr}所示,其中红色点云即为水平面。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=6cm]{5Test_getVolume_3dconstr.png}
+  \includegraphics[height=5cm]{5Test_getVolume_3dconstr.png}
   \caption{包含水平面的三维重建结果示意图}
   \label{fig:5Test_getVolume_3dconstr}
   \end{figure}
@@ -330,7 +330,7 @@ if (mpCurrentKeyFrame->mnId > 4)
 1. 获取绝对尺度:根据图~\ref{fig:5Test_get_Kabs}所示,分别可以获得在ID = 43的二维码坐标系下的相机位姿，如表~\ref{tab:chap1:2D_3D}前两行，可以计算出在这两帧之间相机移动的绝对距离为0.464m。
 \begin{figure}[H] % use float package if you want it here
   \centering
-  \includegraphics[height=4cm]{5Test_get_Kabs.png}
+  \includegraphics[height=5cm]{5Test_get_Kabs.png}
   \caption{两帧之间获取绝对尺度}
   \label{fig:5Test_get_Kabs}
   \end{figure}
@@ -350,11 +350,12 @@ if (mpCurrentKeyFrame->mnId > 4)
   \bottomrule
   \end{tabular}
 \end{table}
+
 3. 估计尺度：按照公式~\ref{equ:getVolume_K}通过多组数据优化估计出堆体三维重建和实际堆体之间的尺度因子大小为K = 10.61。
 \subsection{堆体体积估计}
 针对体积测量实验，本文拟采用如下方式验证所提方法是否能够测量出堆体体积，以及验证测量和测量稳定性。
 
-首先使用测量仪器检测出待测堆体的实际体积真值，随后将堆体分别摆放成单峰堆体，双峰堆体，多峰堆体的形式，按照第~\ref{cha:chap4}章的流程，通过验证三次实验测量值和真值之间的误差衡量视觉算法的精确度，以及对三次测量值之间的数值进行比较，衡量视觉算法测量的稳定性。具体步骤如下：
+首先使用测量仪器检测出待测堆体的实际体积真值，随后将堆体分别摆放成单峰堆体，双峰堆体，多峰堆体的形式，如图~\ref{fig:test}按照第~\ref{cha:chap4}章的流程，通过验证三次实验测量值和真值之间的误差衡量视觉算法的精确度，以及对三次测量值之间的数值进行比较，衡量视觉算法测量的稳定性。具体步骤如下：
 
 1. 将某一堆体放置在水平面上，并在堆体周围放置5个二维码以估计尺度和水平面方程。
 
@@ -362,13 +363,13 @@ if (mpCurrentKeyFrame->mnId > 4)
 
 3. 对上述采集到的图像进行二维码检测与识别，记录下每张图像中的二维码ID以及角点坐标。
 
-4. 对上述采集到的图像进行稀疏重建，记录下稀疏点云中的3D点和每张图像角点之间的映射关系。
+4. 对上述采集到的图像进行稀疏重建，结果如图~\ref{fig:test_sparse}所示,记录下稀疏点云中的3D点和每张图像角点之间的映射关系。
 
 5. 按照~\ref{sec:4.2}估计堆体出水平面方程。
 
 6. 按照~\ref{sec:4.3}估计出堆体的尺度大小。
 
-7. 对稀疏点云进行稠密重建，并将所求解出的水平面方程添加至稠密点云中。
+7. 对稀疏点云进行稠密重建，结果如图~\ref{fig:test_dense}所示,并将所求解出的水平面方程添加至稠密点云中。
 
 8. 按照~\ref{sec:4.4}估计出当前堆体的体积大小。
 
@@ -376,61 +377,104 @@ if (mpCurrentKeyFrame->mnId > 4)
 
 10 根据结果定量分析上述视觉算法测量堆体的准确性和稳定性。
 
-3次实验结果如表~\ref{tab:volume_test_1}，~\ref{tab:volume_test_2}，~\ref{tab:volume_test_3}所示。
+3次实验结果如表~\ref{tab:volume_test}所示。
 \begin{table}[h]
   \centering
-  \caption{体积测量结果-\uppercase\expandafter{\romannumeral1}}
-  \label{tab:volume_test_1}
-  \begin{tabular}{C{2.4cm}C{2.0cm}C{8.0cm}C{2cm}}
+  \caption{体积测量结果}
+  \label{tab:volume_test}
+  \begin{tabular}{C{1.1cm}C{1.2cm}C{1.2cm}C{1.2cm}C{3.6cm}C{1.6cm}C{1.6cm}C{1.5cm}}
   \toprule
-  \textbf{实验批次} & \textbf{图像集数量} & \textbf{堆体场景预览} & \textbf{图像分辨率} \\
+  \textbf{批次} & \textbf{图像数} & \textbf{点个数}& \textbf{尺度K} & \textbf{水平面方程}& \textbf{计算耗时（s）} & \textbf{堆体体积($cm^3$)} & \textbf{测量精度}\\
   \midrule
-  1 & 186   & \includegraphics[width=7.5cm, height=5cm]{test_1.png} & 960*455 \\
-  2 & 201   & \includegraphics[width=7.5cm, height=5cm]{test_2.png} & 960*455\\
-  3 & 215   & \includegraphics[width=7.5cm, height=5cm]{test_3.png} & 960*455\\
+  1 & 186  &110149 &1.945 &-0.0259x-0.0331y-0.0873z+1=0 & 712 & 13221.4  &   1.7$\%$\\
+  2 & 201  & 86403 &8.143 &0.0068x-0.0299y-0.0620z+1=0  & 675 & 12758.3  &   1.8$\%$\\
+  3 & 215  & 83196 &3.522 &0.0119x-0.0254y-0.0683z+1=0  & 663 & 12830.2  &   1.3$\%$\\
   \bottomrule
-  \end{tabular}
+\end{tabular}
 \end{table}
 
-\begin{table}[h]
+对上述沙堆使用仪器测量出的体积真值为13000$cm^3$,通过三次实验，分别得出测量单峰堆体，双峰堆体，多峰堆体的体积
+为13221.4$cm^3$,12758.3$cm^3$,12830.2$cm^3$,测量的误差可以控制在2$\%$以内，且三次测量值接近，测量稳定。
+% \begin{table}[]
+%   \centering
+%   \caption{体积测量结果-\uppercase\expandafter{\romannumeral1}}
+%   \label{tab:volume_test_1}
+%   \begin{tabular}{C{2.4cm}C{2.0cm}C{8.0cm}C{2cm}}
+%   \toprule
+%   \textbf{实验批次} & \textbf{图像集数量} & \textbf{堆体场景预览} & \textbf{图像分辨率} \\
+%   \midrule
+%   1 & 186   & \includegraphics[width=7.5cm, height=5cm]{test_1.png} & 960*455 \\
+%   2 & 201   & \includegraphics[width=7.5cm, height=5cm]{test_2.png} & 960*455\\
+%   3 & 215   & \includegraphics[width=7.5cm, height=5cm]{test_3.png} & 960*455\\
+%   \bottomrule
+%   \end{tabular}
+% \end{table}
+% \begin{table}[H]
+%   \centering
+%   \caption{体积测量结果-\uppercase\expandafter{\romannumeral2}}
+%   \label{tab:volume_test_2}
+%   \begin{tabular}{C{8cm}C{2.0cm}C{1.2cm}C{3.6cm}}
+%   \toprule
+%   \textbf{稀疏点云} & \textbf{点集个数} & \textbf{尺度K} & \textbf{误差}\\
+%   \midrule
+%   \includegraphics[width=7.5cm, height=5cm]{test_1_sparse.png}  &110149&1.945&-0.0259x-0.0331y-0.0873z+1=0\\
+%   \includegraphics[width=7.5cm, height=5cm]{test_2_sparse.png}  & 86403&8.143& 0.0068x-0.0299y-0.0620z+1=0\\
+%   \includegraphics[width=7.5cm, height=5cm]{test_3_sparse.png}  & 83196&3.522& 0.0119x-0.0254y-0.0683z+1=0\\
+%   \bottomrule
+%   \end{tabular}
+% \end{table}
+% \begin{table}[t]
+%   \centering
+%   \caption{体积测量结果-\uppercase\expandafter{\romannumeral3}}
+%   \label{tab:volume_test_3}
+%   \begin{tabular}{C{8cm}C{2.4cm}C{2.4cm}C{2.0cm}}
+%   \toprule
+%   \textbf{稠密点云} & \textbf{计算耗时（s）} & \textbf{堆体体积($cm^3$)} & \textbf{测量精度}\\
+%   \midrule
+%   \includegraphics[width=7.5cm, height=5cm]{test_1_dense.png}  & 712 & 10340  &   1.1$\%$\\
+%   \includegraphics[width=7.5cm, height=5cm]{test_2_dense.png}  & 675 & 99032  &   0.9$\%$\\
+%   \includegraphics[width=7.5cm, height=5cm]{test_3_dense.png}  & 663 & 10552  &   1.3$\%$\\
+%   \bottomrule
+%   \end{tabular}
+% \end{table}
+\begin{figure}[H]
   \centering
-  \caption{体积测量结果-\uppercase\expandafter{\romannumeral2}}
-  \label{tab:volume_test_2}
-  \begin{tabular}{C{8cm}C{2.0cm}C{1.2cm}C{3.6cm}}
-  \toprule
-  \textbf{稀疏点云} & \textbf{点集个数} & \textbf{尺度K} & \textbf{误差}\\
-  \midrule
-  \includegraphics[width=7.5cm, height=5cm]{test_1_sparse.png}  &110149&1.945&-0.0259x-0.0331y-0.0873z+1=0\\
-  \includegraphics[width=7.5cm, height=5cm]{test_2_sparse.png}  & 86403&8.143& 0.0068x-0.0299y-0.0620z+1=0\\
-  \includegraphics[width=7.5cm, height=5cm]{test_3_sparse.png}  & 83196&3.522& 0.0119x-0.0254y-0.0683z+1=0\\
-  \bottomrule
-  \end{tabular}
-\end{table}
+    \subcaptionbox{单峰堆体场景预览图\label{fig:test_1}}{
+    \includegraphics[height=6cm,width=11.7cm]{test_1.png}}
+  \vskip0.5cm
+    \subcaptionbox{双峰堆体场景预览图\label{fig:test_2}}{
+    \includegraphics[height=6cm,width=11.7cm]{test_2.png}}
+  \vskip0.5cm
+    \subcaptionbox{多峰堆体场景预览图\label{fig:test_3}}{
+    \includegraphics[height=6cm,width=11.7cm]{test_3.png}}
+\caption{不同堆体场景预览图}\label{fig:test}
+\end{figure}
 
-
-\begin{table}[h]
+\begin{figure}[H]
   \centering
-  \caption{体积测量结果-\uppercase\expandafter{\romannumeral3}}
-  \label{tab:volume_test_3}
-  \begin{tabular}{C{8cm}C{2.4cm}C{2.4cm}C{2.0cm}}
-  \toprule
-  \textbf{稠密点云} & \textbf{计算耗时（s）} & \textbf{堆体体积($cm^3$)} & \textbf{测量精度}\\
-  \midrule
-  \includegraphics[width=7.5cm, height=5cm]{test_1_dense.png}  & 712 & 10340  &   1.1$\%$\\
-  \includegraphics[width=7.5cm, height=5cm]{test_2_dense.png}  & 675 & 99032  &   0.9$\%$\\
-  \includegraphics[width=7.5cm, height=5cm]{test_3_dense.png}  & 663 & 10552  &   1.3$\%$\\
-  \bottomrule
-  \end{tabular}
-\end{table}
+    \subcaptionbox{单峰堆体场景稀疏点云图\label{fig:test_1_sparse}}{
+    \includegraphics[height=6cm,width=11.7cm]{test_1_sparse.png}}
+  \vskip0.5cm
+    \subcaptionbox{双峰堆体场景稀疏点云图\label{fig:test_2_sparse}}{
+    \includegraphics[height=6cm,width=11.7cm]{test_2_sparse.png}}
+  \vskip0.5cm
+    \subcaptionbox{多峰堆体场景稀疏点云图\label{fig:test_3_sparse}}{
+    \includegraphics[height=6cm,width=11.7cm]{test_3_sparse.png}}
+\caption{不同堆体场景稀疏点云示意图}\label{fig:test_sparse}
+\end{figure}
 
+\begin{figure}[H]
+  \centering
+    \subcaptionbox{单峰堆体场景稠密点云图\label{fig:test_1_dense}}{
+    \includegraphics[height=6cm,width=11.7cm]{test_1_dense.png}}
+  \vskip0.5cm
+    \subcaptionbox{双峰堆体场景稠密点云图\label{fig:test_2_dense}}{
+    \includegraphics[height=6cm,width=11.7cm]{test_2_dense.png}}
+  \vskip0.5cm
+    \subcaptionbox{多峰堆体场景稠密点云图\label{fig:test_3_dense}}{
+    \includegraphics[height=6cm,width=11.7cm]{test_3_dense.png}}
+\caption{不同堆体场景稠密点云示意图}\label{fig:test_dense}
+\end{figure}
 
 \section{本章小结}
-本章分模块测试了无人机在非GPS场景下依靠纯视觉进行定位的效果与精度，以及改进后的三维重建的效果和基于纯视觉的堆体体积测量算法的准确度和稳定性。
-
-本章分模块测试了无人机在非GPS场景下依靠纯视觉进行定位的效果与精度，以及改进后的三维重建的效果和基于纯视觉的堆体体积测量算法的准确度和稳定性。
-
-本章分模块测试了无人机在非GPS场景下依靠纯视觉进行定位的效果与精度，以及改进后的三维重建的效果和基于纯视觉的堆体体积测量算法的准确度和稳定性。
-本章分模块测试了无人机在非GPS场景下依靠纯视觉进行定位的效果与精度，以及改进后的三维重建的效果和基于纯视觉的堆体体积测量算法的准确度和稳定性。
-
-本章分模块测试了无人机在非GPS场景下依靠纯视觉进行定位的效果与精度，以及改进后的三维重建的效果和基于纯视觉的堆体体积测量算法的准确度和稳定性。
 本章分模块测试了无人机在非GPS场景下依靠纯视觉进行定位的效果与精度，以及改进后的三维重建的效果和基于纯视觉的堆体体积测量算法的准确度和稳定性。
