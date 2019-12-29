@@ -9,7 +9,7 @@
 对于三维重建生成点云的实效性以及精度测试，本章将对比第3章所提出的稀疏点云重建所采用的图像匹配模式，定性比较各匹配模式之间的实效性，并结合SLAM将运行后的keyFrame DataBase以及先验位姿提供给离线三维重建系统，定性比较三维重建后点云的精度差异。
 
 对于面向堆体的体积测量精度测试，本文选用沙堆作为研究对象，利用其易获取真值且能够任意改变形状的特点，代替其他堆体进行试验。结合第4章的方法，测试堆体三维点云和实际堆体之间的尺度估计值，堆体点云的水平面方程，以及利用纯视觉方法测试堆体体积的稳定性和精确度。
-\section{无人机视觉定位系统测试}
+\section{无人机视觉定位系统测试与分析}
 \label{sec:5.2}
 \subsection{无人机视觉定位系统实验步骤设计}
 \label{sec:5.2.1}
@@ -151,7 +151,7 @@
   \label{fig:5Test_pose_map}
 \end{figure}
 对于无人机的直飞路线，误差较小，GPS和视觉算法测算出的轨迹基本吻合，但在转弯方向改变的区间，两者之间的相对误差则较大,考虑其原因为在转弯处所设计的循迹点相对比较稠密，导致在该区域内无人机需要改变的方向更大，视觉算法在测算时由于方法振动的缘故产生较大的误差。
-\section{三维重建系统测试}
+\section{三维重建系统测试与分析}
 \label{sec:5.3}
 在本文~\ref{sec:3.2.3}节中，提出了三维重建存在的一些问题，包括对场景进行三维重建时，匹配耗时严重和点云准确性较低，甚至无法重建出三维点云，
 本实验将结合~\ref{sec:3.3}节提出的方法对三维重建进行改进。
@@ -257,7 +257,7 @@ if (mpCurrentKeyFrame->mnId > 4)
   \caption{地下车库三维重建对比图}\label{fig:test_3D}
 \end{figure}
 对于普通三维重建方法而言，地下车库场景重建场景点云难度较大，因为场景中的场景重复度高，匹配精度较低，且反光场景的加入又会导致相机的位姿估计出现偏差，三维重建无法生成有效的点云结果。因此需要结合SLAM的结果来作为三维重建的先验知识，提供更多丰富的匹配约束以及更加精准的相机位姿，可以重建出较好的结果。
-\section{堆体体积测量系统测试}
+\section{堆体体积测量系统测试与分析}
 \label{sec:5.4}
 在第4章，本文提出了一种基于纯视觉方法来测量堆体体积的方法，基于对实验场景进行的三维重建结果，整个实验步骤主要包括以下四个方面：
 
@@ -355,7 +355,8 @@ if (mpCurrentKeyFrame->mnId > 4)
 \subsection{堆体体积估计}
 针对体积测量实验，本文拟采用如下方式验证所提方法是否能够测量出堆体体积，以及验证测量和测量稳定性。
 
-首先使用测量仪器检测出待测堆体的实际体积真值，随后将堆体分别摆放成单峰堆体，双峰堆体，多峰堆体的形式，如图~\ref{fig:test}按照第~\ref{cha:chap4}章的流程，通过验证三次实验测量值和真值之间的误差衡量视觉算法的精确度，以及对三次测量值之间的数值进行比较，衡量视觉算法测量的稳定性。具体步骤如下：
+首先使用测量仪器检测出待测堆体的实际体积真值，随后将堆体分别摆放成单峰堆体，双峰堆体，多峰堆体的形式，如图~\ref{fig:test_1},~\ref{fig:test_2},~\ref{fig:test_3}所示。
+按照第~\ref{cha:chap4}章的流程，通过验证三次实验测量值和真值之间的误差衡量视觉算法的精确度，以及对三次测量值之间的数值进行比较，衡量视觉算法测量的稳定性。具体步骤如下：
 
 1. 将某一堆体放置在水平面上，并在堆体周围放置5个二维码以估计尺度和水平面方程。
 
@@ -363,13 +364,13 @@ if (mpCurrentKeyFrame->mnId > 4)
 
 3. 对上述采集到的图像进行二维码检测与识别，记录下每张图像中的二维码ID以及角点坐标。
 
-4. 对上述采集到的图像进行稀疏重建，结果如图~\ref{fig:test_sparse}所示,记录下稀疏点云中的3D点和每张图像角点之间的映射关系。
+4. 对上述采集到的图像进行稀疏重建，结果如图~\ref{fig:test_1_sparse},~\ref{fig:test_2_sparse},~\ref{fig:test_3_sparse},所示,记录下稀疏点云中的3D点和每张图像角点之间的映射关系。
 
 5. 按照~\ref{sec:4.2}估计堆体出水平面方程。
 
 6. 按照~\ref{sec:4.3}估计出堆体的尺度大小。
 
-7. 对稀疏点云进行稠密重建，结果如图~\ref{fig:test_dense}所示,并将所求解出的水平面方程添加至稠密点云中。
+7. 对稀疏点云进行稠密重建，结果如图~\ref{fig:test_1_dense},~\ref{fig:test_2_dense},~\ref{fig:test_3_dense}所示,并将所求解出的水平面方程添加至稠密点云中。
 
 8. 按照~\ref{sec:4.4}估计出当前堆体的体积大小。
 
@@ -395,6 +396,77 @@ if (mpCurrentKeyFrame->mnId > 4)
 
 对上述沙堆使用仪器测量出的体积真值为13000$cm^3$,通过三次实验，分别得出测量单峰堆体，双峰堆体，多峰堆体的体积
 为13221.4$cm^3$,12758.3$cm^3$,12830.2$cm^3$,测量的误差可以控制在2$\%$以内，且三次测量值接近，测量稳定。
+
+\begin{figure}[H]
+  \centering
+  \subcaptionbox{单峰预览图\label{fig:test_1}}{
+  \includegraphics[width=6.5cm,height=4.2cm,angle=90]{test_1.png}\hskip0.5cm}
+  \subcaptionbox{单峰稀疏点云图\label{fig:test_1_sparse}}{
+  \includegraphics[width=6.5cm,height=4.2cm,angle=90]{test_1_sparse.png}\hskip0.5cm}
+  \subcaptionbox{单峰稠密点云图\label{fig:test_1_dense}}{
+  \includegraphics[width=6.5cm,height=4.2cm,angle=90]{test_1_dense.png}}
+\vskip0.2cm
+   \subcaptionbox{双峰预览图\label{fig:test_2}}{
+  \includegraphics[width=6.5cm,height=4.2cm,angle=90]{test_2.png}\hskip0.5cm}
+  \subcaptionbox{双峰稀疏点云图\label{fig:test_2_sparse}}{
+  \includegraphics[width=6.5cm,height=4.2cm,angle=90]{test_2_sparse.png}\hskip0.5cm}
+  \subcaptionbox{双峰稠密点云图\label{fig:test_2_dense}}{
+  \includegraphics[width=6.5cm,height=4.2cm,angle=90]{test_2_dense.png}}
+\vskip0.2cm      
+   \subcaptionbox{多峰预览图\label{fig:test_3}}{
+  \includegraphics[width=6.5cm,height=4.2cm,angle=90]{test_3.png}\hskip0.5cm}
+  \subcaptionbox{多峰稀疏点云图\label{fig:test_3_sparse}}{
+  \includegraphics[width=6.5cm,height=4.2cm,angle=90]{test_3_sparse.png}\hskip0.5cm}
+  \subcaptionbox{多峰稠密点云图\label{fig:test_3_dense}}{
+  \includegraphics[width=6.5cm,height=4.2cm,angle=90]{test_3_dense.png}}
+
+\caption{多类别堆体示意图}\label{fig:2VSLAM_big}
+\end{figure}
+
+% \begin{sidewaysfigure}
+%   \centering
+%   \subcaptionbox{x轴旋转\label{fig:chap05:rx}}{
+%   \includegraphics[width=0.31\textwidth]{test_1.png}}\hspace{0.1em}
+%   \subcaptionbox{y轴旋转\label{fig:chap05:ry}}{
+%   \includegraphics[width=0.31\textwidth]{test_1.png}}\hspace{0.1em}
+%   \subcaptionbox{z轴旋转\label{fig:chap05:rz}}{
+%   \includegraphics[width=0.31\textwidth]{test_1.png}}
+%   \vskip 0.3cm
+%   \subcaptionbox{x轴平移\label{fig:chap05:tx}}{
+%   \includegraphics[width=0.31\textwidth]{test_1.png}}\hspace{0.1em}
+%   \subcaptionbox{y轴平移\label{fig:chap05:ty}}{
+%   \includegraphics[width=0.31\textwidth]{test_1.png}}\hspace{0.1em}
+%   \subcaptionbox{z轴平移\label{fig:chap05:tz}}{
+%   \includegraphics[width=0.31\textwidth]{test_1.png}}
+%   \caption{Rigid Pose追踪精度测试图}
+%   \label{fig:chap05:rigidpose_rig_track}
+% \end{sidewaysfigure}
+
+% \begin{figure}[h]
+%   \centering
+%       \subcaptionbox{单峰预览图\label{fig:2VSLAM_big1}}{
+%       \includegraphics[width=4cm]{test_1.png}\hskip1cm}
+%       \subcaptionbox{双峰预览图\label{fig:2VSLAM_big2}}{
+%       \includegraphics[width=4cm]{test_2.png}\hskip1cm}
+%       \subcaptionbox{多峰预览图\label{fig:2VSLAM_big2}}{
+%       \includegraphics[width=4cm]{test_3.png}}
+%     \vskip0.2cm
+%       \subcaptionbox{单峰稀疏点云图\label{fig:2VSLAM_big4}}{
+%       \includegraphics[width=4cm]{test_1_sparse.png}\hskip1cm}
+%       \subcaptionbox{双峰稀疏点云图\label{fig:2VSLAM_big5}}{
+%       \includegraphics[width=4cm]{test_2_sparse.png}\hskip1cm}
+%       \subcaptionbox{多峰稠密点云图\label{fig:2VSLAM_big6}}{
+%       \includegraphics[width=4cm]{test_3_sparse.png}}
+%     \vskip0.2cm      
+%       \subcaptionbox{单峰稠密点云图\label{fig:2VSLAM_big7}}{
+%       \includegraphics[width=4cm]{test_1_dense.png}\hskip1cm}
+%       \subcaptionbox{双峰稠密点云图\label{fig:2VSLAM_big8}}{
+%       \includegraphics[width=4cm]{test_2_dense.png}\hskip1cm}
+%       \subcaptionbox{多峰稀疏点云图\label{fig:2VSLAM_big9}}{
+%       \includegraphics[width=4cm]{test_3_dense.png}}
+
+%   \caption{多类别堆体示意图}\label{fig:2VSLAM_big}
+% \end{figure}
 % \begin{table}[]
 %   \centering
 %   \caption{体积测量结果-\uppercase\expandafter{\romannumeral1}}
@@ -437,44 +509,50 @@ if (mpCurrentKeyFrame->mnId > 4)
 %   \bottomrule
 %   \end{tabular}
 % \end{table}
-\begin{figure}[H]
-  \centering
-    \subcaptionbox{单峰堆体场景预览图\label{fig:test_1}}{
-    \includegraphics[height=6cm,width=11.7cm]{test_1.png}}
-  \vskip0.5cm
-    \subcaptionbox{双峰堆体场景预览图\label{fig:test_2}}{
-    \includegraphics[height=6cm,width=11.7cm]{test_2.png}}
-  \vskip0.5cm
-    \subcaptionbox{多峰堆体场景预览图\label{fig:test_3}}{
-    \includegraphics[height=6cm,width=11.7cm]{test_3.png}}
-\caption{不同堆体场景预览图}\label{fig:test}
-\end{figure}
 
-\begin{figure}[H]
-  \centering
-    \subcaptionbox{单峰堆体场景稀疏点云图\label{fig:test_1_sparse}}{
-    \includegraphics[height=6cm,width=11.7cm]{test_1_sparse.png}}
-  \vskip0.5cm
-    \subcaptionbox{双峰堆体场景稀疏点云图\label{fig:test_2_sparse}}{
-    \includegraphics[height=6cm,width=11.7cm]{test_2_sparse.png}}
-  \vskip0.5cm
-    \subcaptionbox{多峰堆体场景稀疏点云图\label{fig:test_3_sparse}}{
-    \includegraphics[height=6cm,width=11.7cm]{test_3_sparse.png}}
-\caption{不同堆体场景稀疏点云示意图}\label{fig:test_sparse}
-\end{figure}
+% \begin{figure}[H]
+%   \centering
+%     \subcaptionbox{单峰堆体场景预览图\label{fig:test_1}}{
+%     \includegraphics[height=6cm,width=11.7cm]{test_1.png}}
+%   \vskip0.5cm
+%     \subcaptionbox{双峰堆体场景预览图\label{fig:test_2}}{
+%     \includegraphics[height=6cm,width=11.7cm]{test_2.png}}
+%   \vskip0.5cm
+%     \subcaptionbox{多峰堆体场景预览图\label{fig:test_3}}{
+%     \includegraphics[height=6cm,width=11.7cm]{test_3.png}}
+% \caption{不同堆体场景预览图}\label{fig:test}
+% \end{figure}
 
-\begin{figure}[H]
-  \centering
-    \subcaptionbox{单峰堆体场景稠密点云图\label{fig:test_1_dense}}{
-    \includegraphics[height=6cm,width=11.7cm]{test_1_dense.png}}
-  \vskip0.5cm
-    \subcaptionbox{双峰堆体场景稠密点云图\label{fig:test_2_dense}}{
-    \includegraphics[height=6cm,width=11.7cm]{test_2_dense.png}}
-  \vskip0.5cm
-    \subcaptionbox{多峰堆体场景稠密点云图\label{fig:test_3_dense}}{
-    \includegraphics[height=6cm,width=11.7cm]{test_3_dense.png}}
-\caption{不同堆体场景稠密点云示意图}\label{fig:test_dense}
-\end{figure}
+% \begin{figure}[H]
+%   \centering
+%     \subcaptionbox{单峰堆体场景稀疏点云图\label{fig:test_1_sparse}}{
+%     \includegraphics[height=6cm,width=11.7cm]{test_1_sparse.png}}
+%   \vskip0.5cm
+%     \subcaptionbox{双峰堆体场景稀疏点云图\label{fig:test_2_sparse}}{
+%     \includegraphics[height=6cm,width=11.7cm]{test_2_sparse.png}}
+%   \vskip0.5cm
+%     \subcaptionbox{多峰堆体场景稀疏点云图\label{fig:test_3_sparse}}{
+%     \includegraphics[height=6cm,width=11.7cm]{test_3_sparse.png}}
+% \caption{不同堆体场景稀疏点云示意图}\label{fig:test_sparse}
+% \end{figure}
+
+% \begin{figure}[H]
+%   \centering
+%     \subcaptionbox{单峰堆体场景稠密点云图\label{fig:test_1_dense}}{
+%     \includegraphics[height=6cm,width=11.7cm]{test_1_dense.png}}
+%   \vskip0.5cm
+%     \subcaptionbox{双峰堆体场景稠密点云图\label{fig:test_2_dense}}{
+%     \includegraphics[height=6cm,width=11.7cm]{test_2_dense.png}}
+%   \vskip0.5cm
+%     \subcaptionbox{多峰堆体场景稠密点云图\label{fig:test_3_dense}}{
+%     \includegraphics[height=6cm,width=11.7cm]{test_3_dense.png}}
+% \caption{不同堆体场景稠密点云示意图}\label{fig:test_dense}
+% \end{figure}
 
 \section{本章小结}
-本章分模块测试了无人机在非GPS场景下依靠纯视觉进行定位的效果与精度，以及改进后的三维重建的效果和基于纯视觉的堆体体积测量算法的准确度和稳定性。
+本章分模块测试了无人机在非GPS场景下依靠纯视觉进行定位的效果与精度，以及改进后的三维重建的效果和基于纯视觉的堆体体
+积测量算法的准确度和稳定性。
+
+对于无人机的定位系统，高度方向的误差为0.18m，整体误差为0.5m，整体定位精度在5$\%$以内，
+对于结合了SLAM结果的三维重建系统，匹配速度和点云模型准确度明显提升，最后的体积测量模块，
+可以估计出准确的尺度大小和水平面解析方程，通过对点云体积的求解获得堆体体积，测量误差可以控制在2$\%$以内。
